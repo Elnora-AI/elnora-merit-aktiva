@@ -1,0 +1,58 @@
+name: Release
+
+# Publishes @elnora-ai/merit-aktiva to npm when a GitHub Release is published
+# (release-please.yml creates the release). Uses npm Trusted Publishing (OIDC) +
+# provenance — the highest-assurance npm publish posture:
+#   - NO long-lived NPM_TOKEN secret is stored anywhere. GitHub mints a short-lived,
+#     workflow-scoped OIDC token per run (requires `id-token: write`), so there is no
+#     standing credential to leak or rotate.
+#   - `--provenance` records a signed, verifiable attestation linking the published
+#     tarball to this exact commit + workflow run (the "provenance" badge on npmjs.com).
+#
+# ONE-TIME SETUP (required before the first release can publish):
+#   On npmjs.com → the @elnora-ai/merit-aktiva package (or the @elnora-ai org) →
+#   Settings → Trusted Publisher → add GitHub Actions with:
+#     Repository:        Elnora-AI/elnora-merit-aktiva
+#     Workflow filename: release.yml
+#   For the very first publish (package does not exist yet), either configure an
+#   org-level trusted publisher for the scope, or run one manual `npm publish` and then
+#   enable trusted publishing. After that, every release publishes tokenlessly.
+#
+# Requires npm >= 11.5.1 (Trusted Publishing); setup-node with Node 20 ships a new-enough npm.
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  publish-npm:
+    name: Publish to npm (OIDC + provenance)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # OIDC — mints the short-lived publish token; no NPM_TOKEN
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - name: Sync version from the release tag
+        env:
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          VERSION="${REF_NAME#v}"
+          echo "Publishing version: $VERSION"
+          npm version "$VERSION" --no-git-tag-version --allow-same-version
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm build
+      # No NODE_AUTH_TOKEN: Trusted Publishing authenticates via the OIDC id-token above.
+      - run: npm publish --provenance --access public

@@ -1,0 +1,23 @@
+# Normalize line endings to LF in the repo, let git handle checkout per-OS
+* text=auto eol=lf
+
+# Ensure these are always LF regardless of OS
+*.ts text eol=lf
+*.js text eol=lf
+*.mjs text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.sh text eol=lf
+*.toml text eol=lf
+
+# Keep Windows scripts as CRLF
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary files
+*.png binary
+*.ico binary
+*.exe binary

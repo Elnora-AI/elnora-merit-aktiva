@@ -1,0 +1,81 @@
+{
+  "name": "@elnora-ai/merit-aktiva",
+  "version": "0.1.0",
+  "description": "Merit Aktiva accounting API for Claude Code — full CLI for the Estonian/Polish Merit Aktiva REST API, plus agents and slash commands.",
+  "type": "module",
+  "bin": {
+    "elnora-merit": "dist/cli.js"
+  },
+  "main": "dist/cli.js",
+  "files": [
+    "dist/",
+    "agents/",
+    "commands/",
+    "skills/",
+    ".claude-plugin/",
+    "AGENTS.md",
+    "INSTALL_FOR_AGENTS.md",
+    "README.md",
+    "SAFETY.md",
+    "docs/",
+    "stripe-map.example.json",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "pnpm clean && tsc",
+    "dev": "tsx src/cli.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "biome check src/ __tests__/",
+    "lint:fix": "biome check --write src/ __tests__/",
+    "format": "biome format --write src/ __tests__/",
+    "typecheck": "tsc --noEmit",
+    "check:config": "node scripts/check-no-committed-stripe-map.mjs",
+    "prepack": "pnpm build",
+    "prepublishOnly": "pnpm typecheck && pnpm lint && pnpm test"
+  },
+  "keywords": [
+    "merit",
+    "merit-aktiva",
+    "accounting",
+    "stripe",
+    "reconciliation",
+    "estonia",
+    "e-invoice",
+    "invoicing",
+    "cli",
+    "claude-code",
+    "claude-code-plugin",
+    "agent",
+    "elnora"
+  ],
+  "author": "Elnora AI <opensource@elnora.ai>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Elnora-AI/elnora-merit-aktiva"
+  },
+  "bugs": {
+    "url": "https://github.com/Elnora-AI/elnora-merit-aktiva/issues"
+  },
+  "homepage": "https://github.com/Elnora-AI/elnora-merit-aktiva",
+  "packageManager": "pnpm@10.33.0",
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.10",
+    "@types/node": "^25.5.0",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.2"
+  },
+  "dependencies": {
+    "commander": "^15.0.0"
+  }
+}
