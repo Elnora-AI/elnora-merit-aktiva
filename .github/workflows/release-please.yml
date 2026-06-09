@@ -22,7 +22,7 @@ jobs:
     name: Release Please
     runs-on: ubuntu-latest
     steps:
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@v5
         with:
           # A PAT in RELEASE_TOKEN lets the release PR trigger CI; falls back to the
           # built-in GITHUB_TOKEN (PRs it opens won't re-trigger workflows, which is fine).
