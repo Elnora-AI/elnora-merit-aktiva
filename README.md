@@ -4,53 +4,68 @@
 [![npm version](https://img.shields.io/npm/v/@elnora-ai/merit-aktiva.svg)](https://www.npmjs.com/package/@elnora-ai/merit-aktiva)
 [![CI](https://github.com/Elnora-AI/elnora-merit-aktiva/actions/workflows/ci.yml/badge.svg)](https://github.com/Elnora-AI/elnora-merit-aktiva/actions/workflows/ci.yml)
 
-A complete command-line client and Claude Code plugin for the [Merit Aktiva](https://www.merit.ee/) accounting API — the Estonian (`aktiva.merit.ee`) and Polish (`program.360ksiegowosc.pl`) cloud accounting platform.
+Do your [Merit Aktiva](https://www.merit.ee/) accounting from the command line — or let Claude Code do it for you.
 
-Full coverage of the Merit Aktiva REST API across **22 accounting resource groups** — sales & purchase invoices, sales offers, recurring invoices, payments, general ledger, fixed assets, taxes, customers, vendors, accounts, projects, cost centers, dimensions, departments, prices & discounts, units of measure, banks, financial years, items, and reports.
+Merit Aktiva is Estonia's cloud accounting platform. This repo gives you two ways to drive its API:
 
-It also covers the [**Merit Palk**](https://api.merit.ee/merit-palk-api/palk-reference-manual/) payroll API (Estonia, `palk.merit.ee`) under the `palk` command group — employees, contracts, base salary agreements, salaries & withholdings, absences, GL, vacation obligation, and the salary/hours report. Palk uses its own credentials and a PRO license (see [Merit Palk (payroll)](#merit-palk-payroll)).
+- **`elnora-merit` — a CLI** that covers the entire Merit Aktiva API (invoices, payments, VAT/KMD, ledger, reports, and more) plus Merit Palk payroll. JSON in, JSON out.
+- **A Claude Code plugin** that wraps the CLI in skills, agents, and slash commands, so you can ask in plain English ("book this purchase invoice", "file my KMD") and Claude runs the right commands the right way.
 
-- **Universal & open** — no account-specific values are baked in. Configure with environment variables; works for any Merit Aktiva company.
-- **Correct by construction** — HMAC-SHA256 request signing verified against Merit's published test vector.
-- **Agent-friendly** — JSON by default, machine-readable error envelopes with dedicated exit codes, `--data/--file` JSON input for complex payloads.
-- **Safe** — destructive operations require an explicit `--yes`; credentials and signatures are redacted from all output.
+Everything is universal — nothing about any one company is hardcoded. Point it at your own Merit credentials and it works.
 
-> Requires a Merit Aktiva **Pro** or **Premium** license (the API is not available on lower tiers).
+> Requires a Merit Aktiva **Pro** or **Premium** license — the API is not available on lower tiers.
+
+---
 
 ## Install
+
+### As a CLI
 
 ```bash
 npm install -g @elnora-ai/merit-aktiva
 ```
 
-This puts the `elnora-merit` CLI on your PATH. Node.js ≥ 20 required.
+This puts the `elnora-merit` command on your PATH. Node.js ≥ 20 required.
+
+### As a Claude Code plugin
+
+Paste these two slash commands into Claude Code one at a time — wait for the first to finish before the second:
+
+```
+/plugin marketplace add Elnora-AI/elnora-merit-aktiva
+```
+
+```
+/plugin install merit-aktiva-workspace@elnora-merit-aktiva
+```
+
+The plugin uses the `elnora-merit` CLI under the hood, so install that first.
+
+---
 
 ## Authenticate
 
 Generate an **API ID** and **API Key** in Merit Aktiva:
 **Settings → Company data → API settings → "Koosta võti" (Generate key)**.
 
-Provide them via environment variables, an env file, or an interactive prompt (the CLI prompts and saves to `~/.config/elnora-merit/.env` with mode `0600` on first use):
+The CLI reads them from environment variables. On first run it also prompts and saves them to `~/.config/elnora-merit/.env` (mode `0600`):
 
 ```bash
 export MERIT_API_ID=your-api-id
 export MERIT_API_KEY=your-api-key
-export MERIT_LOCALIZATION=ee   # ee (Estonia, default) or pl (Poland)
-export MERIT_API_VERSION=v1    # default for dual-version endpoints
 ```
 
-Or copy [`.env.template`](.env.template) to `.env` and fill it in (the `.env` is gitignored — never commit it).
+Or copy [`.env.template`](.env.template) to `.env` and fill it in (`.env` is gitignored — never commit it).
 
-| Variable | Required | Default | Notes |
-|---|---|---|---|
-| `MERIT_API_ID` | yes | — | GUID from API settings |
-| `MERIT_API_KEY` | yes | — | base64 secret; HMAC shared key |
-| `MERIT_LOCALIZATION` | no | `ee` | `ee` or `pl` |
-| `MERIT_API_VERSION` | no | `v1` | `v1` or `v2` default |
-| `MERIT_BASE_URL` | no | derived | override the API base (testing/mocking) |
-| `MERIT_PALK_API_ID` | for `palk` | — | Merit Palk API ID (separate product; generated in Palk → Settings → API Settings) |
-| `MERIT_PALK_API_KEY` | for `palk` | — | Merit Palk API key (base64 secret) |
-| `MERIT_PALK_BASE_URL` | no | derived | override the Palk API base (testing/mocking) |
+| Variable | Required | Notes |
+|---|---|---|
+| `MERIT_API_ID` | yes | GUID from API settings |
+| `MERIT_API_KEY` | yes | base64 secret; the HMAC signing key |
+| `MERIT_API_VERSION` | no | `v1` (default) or `v2` for dual-version endpoints |
+| `MERIT_PALK_API_ID` | for `palk` | Merit Palk API ID (separate payroll product) |
+| `MERIT_PALK_API_KEY` | for `palk` | Merit Palk API key (base64 secret) |
+
+---
 
 ## Quickstart
 
@@ -58,40 +73,28 @@ Or copy [`.env.template`](.env.template) to `.env` and fill it in (the `.env` is
 elnora-merit accounts list                              # chart of accounts
 elnora-merit banks list                                 # bank accounts
 elnora-merit taxes list                                 # VAT rates
+elnora-merit customers list --name "Acme"               # find a customer
 elnora-merit sales-invoices list --period-start 2026-01-01 --period-end 2026-03-31
 elnora-merit reports income-statement --end-date 20260331 --per-count 3
-elnora-merit customers list --name "Acme"               # find a customer
 
-# Output controls (global)
+# Output controls (work on any command)
 elnora-merit accounts list --output table --fields Code,Name
 elnora-merit accounts list --pretty                     # pretty JSON
 ```
 
-### Creating documents
-
-Create/send endpoints take the documented Merit JSON body via `--data` (inline) or `--file` (path). Each command's `--help` summarizes the required fields:
+**Creating documents.** Create/send commands take the Merit JSON body via `--data` (inline) or `--file` (path). Each command's `--help` lists the required fields:
 
 ```bash
 elnora-merit sales-invoices create --file invoice.json
-elnora-merit sales-invoices create --data '{ "Customer": { "Name": "Acme OÜ", "CountryCode": "EE", "NotTDCustomer": "false" }, "InvoiceNo": "2026-001", ... }'
 ```
 
-See `elnora-merit sales-invoices create --help` for the full payload schema, and the [official reference manual](https://api.merit.ee/connecting-robots/reference-manual/) for field details.
+See the [official Merit reference manual](https://api.merit.ee/connecting-robots/reference-manual/) for field details.
 
-## Output & errors
+---
 
-- **Formats:** `--output json` (default, compact), `table`, or `csv`. `--pretty` for indented JSON. `--fields a,b` to project columns.
-- **Errors** are JSON on stderr with a message, a suggestion, and structured data:
+## What you can do
 
-```json
-{ "error": "Merit API error 401 on getinvoices.", "suggestion": "...", "status": 401 }
-```
-
-- **Exit codes:** `0` success · `1` general · `2` validation · `3` auth · `5` rate limited · `6` API error.
-
-## Command reference
-
-Every Merit Aktiva endpoint is available. Run `elnora-merit <group> --help` for the per-command options and payload schemas.
+Full coverage of the Merit Aktiva REST API across **22 resource groups**. Run `elnora-merit <group> --help` for per-command options and payload schemas.
 
 | Group | Commands |
 |---|---|
@@ -105,7 +108,7 @@ Every Merit Aktiva endpoint is available. Run `elnora-merit <group> --help` for 
 | `fixed-assets` | list, list-locations, list-responsible-persons, send |
 | `taxes` | list, create |
 | `customers` | list, create, update, create-group, list-groups |
-| `vendors` | list, create, update, update-v1, create-group, list-groups, list-groups-pl |
+| `vendors` | list, create, update, update-v1, create-group, list-groups |
 | `accounts` | list |
 | `projects` | list |
 | `cost-centers` | list |
@@ -119,106 +122,96 @@ Every Merit Aktiva endpoint is available. Run `elnora-merit <group> --help` for 
 | `reports` | income-statement, balance-sheet, inventory, sales, purchase, customer-debts, customer-payments, more-data |
 | `reconcile` | init, preview, run, status — book Stripe payouts into Merit (see below) |
 
-### Merit Palk (payroll)
+### Payroll (Merit Palk)
 
-`palk` is a separate Merit product (payroll) with its own credentials (`MERIT_PALK_API_ID` / `MERIT_PALK_API_KEY`), its own host (`palk.merit.ee`, Estonia-only), and a v1-only API. It requires a Merit Palk **PRO** license. Read commands expose the documented query fields as flags; write commands (`create`/`add`/`set`) take the documented JSON body via `--data`/`--file`.
+`palk` is Merit's separate payroll product. It uses its own credentials (`MERIT_PALK_API_ID` / `MERIT_PALK_API_KEY`) and needs a Merit Palk **PRO** license.
 
 ```bash
-elnora-merit palk employees list                         # all employees
-elnora-merit palk employees list --personal-code 4910...  --output table
+elnora-merit palk employees list
 elnora-merit palk base-salary list --start-month 202601 --end-month 202612
 elnora-merit palk gl get --month 202606                   # GL batch for a month
-elnora-merit palk vacation balance --contract-code 4910... --date 2026-06-30
 elnora-merit palk salary-report --start-date 2026-06-01 --end-date 2026-06-30
 ```
 
-| Group | Commands | Endpoint |
-|---|---|---|
-| `palk employees` | list, create | getemployees, sendemployees |
-| `palk contacts` | add | sendcontacts |
-| `palk base-salary` | list, create | getpayterms, sendpayterms |
-| `palk salary` | create | sendsalary |
-| `palk absences` | create | sendabsence |
-| `palk gl` | get | getglbatch |
-| `palk vacation` | balance, set-liability | getvacoblig, sendvacoblig |
-| `palk salary-report` | _(leaf)_ | getsalaryreport |
-| `palk dimensions` | set | senddimensions |
-| `palk tax-free` | set | sendtaxfree |
-| `palk reduced-capacity` | set | sendincapacitypension |
+| Group | Commands |
+|---|---|
+| `palk employees` | list, create |
+| `palk contacts` | add |
+| `palk base-salary` | list, create |
+| `palk salary` | create |
+| `palk absences` | create |
+| `palk gl` | get |
+| `palk vacation` | balance, set-liability |
+| `palk salary-report` | _(leaf command)_ |
+| `palk dimensions` | set |
+| `palk tax-free` | set |
+| `palk reduced-capacity` | set |
 
-> Palk dates are `YYYY-MM-DD` and months are `YYYYMM` — see the [Palk reference manual](https://api.merit.ee/merit-palk-api/palk-reference-manual/).
+> Palk dates are `YYYY-MM-DD` and months are `YYYYMM`. See the [Palk reference manual](https://api.merit.ee/merit-palk-api/palk-reference-manual/).
 
-## Notes & gotchas
+### Reconcile Stripe payouts
 
-- Merit endpoints are **POST with a JSON body**, even read/query operations.
-- **Dates:** query fields use `YYYYMMDD` (the CLI also accepts `YYYY-MM-DD` and normalizes). Some payload date fields use `YYYYMMDDHHMMSS` — see each command's help.
-- **Period limits:** invoice list queries span at most 3 months.
-- **Batch limit:** at most 500 rows per document (split larger payloads).
-- **Sales invoices cannot be updated** — delete and re-create. Merit does not issue invoice numbers; manage your own.
-- **Rate limit:** 100 requests/minute. The CLI auto-retries HTTP 429 honouring `Retry-After`, with a fresh timestamp per attempt.
-
-## Reconcile Stripe payouts
-
-Book Stripe card sales, processing fees, platform fees, and refunds into Merit, one
-**payout** at a time (a payout = one bank deposit). Works for any Stripe account → any
-Merit company; nothing account-specific is hardcoded.
+Book Stripe card sales, fees, and refunds into Merit, one **payout** at a time (a payout = one bank deposit). Works for any Stripe account → any Merit company.
 
 ```bash
-# 1. One-time: write a config template and list candidate account/VAT values
-elnora-merit reconcile init                 # creates ~/.config/elnora-merit/stripe-map.json
-# ...edit that file: account codes (incl. clearing), vat.code (see stripe-map.example.json)
+elnora-merit reconcile init                 # write a config template to ~/.config/elnora-merit/stripe-map.json
+# ...edit that file: account codes + VAT (see stripe-map.example.json)
 
-# 2. Set the Stripe key (live, read-only restricted key is enough)
-export STRIPE_API_KEY=sk_live_...           # or put it in ~/.config/elnora-merit/.env
+export STRIPE_API_KEY=sk_live_...           # a read-only restricted key is enough
 
-# 3. Preview — read-only, shows exactly what would be booked
-elnora-merit reconcile preview --output table
-elnora-merit reconcile preview --payout po_123
-
-# 4. Book it (writes; requires --yes; idempotent — skips already-booked payouts)
-elnora-merit reconcile run --yes
-elnora-merit reconcile status               # booked vs outstanding
+elnora-merit reconcile preview --output table   # read-only: shows exactly what would be booked
+elnora-merit reconcile run --yes                # book it (idempotent — never books a payout twice)
+elnora-merit reconcile status                   # booked vs outstanding
 ```
 
-**How it books** (per payout): each payout becomes **one balanced summary GL batch**
-(`sendglbatch`) — no per-charge invoices or receipts. It debits the **clearing account**
-(`accounts.clearing`) with the gross card sales and credits **revenue** (net of VAT — e.g.
-24% for EE). The output VAT is **not** an explicit row: the revenue line carries the VAT
-TaxId + amount, and Merit posts the VAT credit implicitly from that tag (which is also what
-auto-populates the KMD; an explicit VAT row would double-post). Stripe and platform fees are
-debited as a separate expense and credited back to clearing (revenue is booked GROSS with
-fees as a cost — ASC 606 / IFRS 15 principal treatment). The clearing account is left holding exactly the payout net, which your real
-bank-import row then clears in the Merit UI (one match per payout) — so there is no double
-bank posting. Genuine company sales invoices are
-booked separately, outside this tool. The connector refuses to book a payout whose Stripe
-figures don't balance, and records every booked payout in a local ledger so it is never
-booked twice.
+Each payout becomes one balanced summary GL batch: card sales debit a clearing account, revenue is credited net of VAT (the VAT posts implicitly from the revenue line's tax tag, which auto-populates the KMD), and fees are booked as a separate expense. Your real bank-import row then clears the payout net in Merit — no double posting. The connector refuses to book a payout whose figures don't balance. See [docs/stripe-reconciliation-spec.md](docs/stripe-reconciliation-spec.md) for the full design.
 
-> Notes: payout-driven and forward-only (set `cutoffDate` in the map). VAT-period
-> boundaries are computed in the map's `vatTimezone` (default `Europe/Tallinn`; set
-> `Europe/Warsaw` for Poland), so a month-end charge lands in the correct KMD period. A
-> payout whose charges span two VAT months is held back rather than mis-dated — book each
-> charge month by hand (the connector does not auto-split). Refunds are booked as a gross
-> contra without output-VAT reversal — adjust the VAT on refunds manually. Optional map
-> fields: `revenueMemo` (label on the revenue line), `vatTimezone`. Merit has no inbound
-> webhooks, so this is run on demand (or scheduled) rather than real-time. See
-> [docs/stripe-reconciliation-spec.md](docs/stripe-reconciliation-spec.md) for the full design.
+---
 
-## Claude Code plugin
-
-This repo is also a Claude Code plugin (`merit-aktiva-workspace`): routing skills, slash commands, and agents that wrap the CLI. See [AGENTS.md](AGENTS.md) for agent usage conventions, [INSTALL_FOR_AGENTS.md](INSTALL_FOR_AGENTS.md) for a step-by-step agent setup walkthrough, and [the plugin skill](skills/merit-aktiva-workspace/SKILL.md).
-
-It ships how-to skills for both products. **Accounting:** `merit-aktiva-workspace` (router), `merit-sales-invoices`, `merit-purchase-invoices`, `merit-payments-bank`, `merit-vat-kmd`, `merit-reports`, `merit-reverse-charge`, `merit-stripe`. **Payroll:** `merit-palk-workspace` (router), `merit-palk-employees`, `merit-palk-payroll`, `merit-palk-reports`, `merit-palk-settings`.
-
-Run these as two separate slash commands — paste the first, wait for it to finish, then paste the second:
+## What's in this repo
 
 ```
-/plugin marketplace add Elnora-AI/elnora-merit-aktiva
+elnora-merit-aktiva/
+├── src/                    # the elnora-merit CLI (TypeScript)
+├── skills/                 # Claude Code how-to skills (the right Merit procedure for each task)
+├── agents/                 # plugin agents
+├── commands/               # plugin slash commands
+├── docs/                   # Stripe reconciliation spec and design notes
+├── .claude-plugin/         # plugin + marketplace manifest
+├── AGENTS.md               # agent usage conventions
+└── INSTALL_FOR_AGENTS.md   # step-by-step agent setup walkthrough
 ```
 
-```
-/plugin install merit-aktiva-workspace@elnora-merit-aktiva
-```
+The plugin ships how-to skills for both products so Claude follows the correct Merit procedure, not just the raw API:
+
+- **Accounting** — `merit-aktiva-workspace` (router), `merit-sales-invoices`, `merit-purchase-invoices`, `merit-payments-bank`, `merit-vat-kmd`, `merit-reports`, `merit-reverse-charge`, `merit-stripe`.
+- **Payroll** — `merit-palk-workspace` (router), `merit-palk-employees`, `merit-palk-payroll`, `merit-palk-reports`, `merit-palk-settings`.
+
+---
+
+## Design
+
+- **Universal & open** — no account-specific values baked in. Configure with env vars; works for any Merit company.
+- **Correct by construction** — HMAC-SHA256 request signing, verified against Merit's published test vector.
+- **Agent-friendly** — JSON by default, machine-readable error envelopes with dedicated exit codes, `--data`/`--file` for complex payloads.
+- **Safe** — destructive operations require an explicit `--yes`; credentials and signatures are redacted from all output.
+
+### Output & errors
+
+- **Formats:** `--output json` (default, compact), `table`, or `csv`. `--pretty` for indented JSON. `--fields a,b` to pick columns.
+- **Errors** are JSON on stderr with a message, a suggestion, and structured data.
+- **Exit codes:** `0` success · `1` general · `2` validation · `3` auth · `5` rate limited · `6` API error.
+
+### Notes & gotchas
+
+- Merit endpoints are **POST with a JSON body**, even read/query operations.
+- **Dates:** query fields use `YYYYMMDD` (the CLI also accepts `YYYY-MM-DD` and normalizes). Some payload fields use `YYYYMMDDHHMMSS` — see each command's help.
+- **Period limits:** invoice list queries span at most 3 months.
+- **Batch limit:** at most 500 rows per document.
+- **Sales invoices cannot be updated** — delete and re-create. Merit does not issue invoice numbers; manage your own.
+- **Rate limit:** 100 requests/minute. The CLI auto-retries HTTP 429 honouring `Retry-After`.
+
+---
 
 ## Development
 
@@ -233,3 +226,5 @@ See [CONTRIBUTING](.github/CONTRIBUTING.md) and [SAFETY](SAFETY.md).
 ## License
 
 [Apache-2.0](LICENSE) © Elnora AI. Not affiliated with or endorsed by Merit Tarkvara AS.
+</content>
+</invoke>
