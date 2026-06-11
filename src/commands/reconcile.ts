@@ -9,7 +9,7 @@
 //
 // See docs/stripe-reconciliation-spec.md for the full design.
 
-import { chmodSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { closeSync, fchmodSync, mkdirSync, openSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import type { Command } from "commander";
 import { getClient } from "../client/index.js";
@@ -104,15 +104,30 @@ export function setupReconcileCommand(program: Command): void {
 		.action(
 			handleAsyncCommand(async (opts: { map?: string; force?: boolean }) => {
 				const path = resolveMapPath(opts.map);
-				if (existsSync(path) && !opts.force) {
-					throw new ValidationError(
-						`A map already exists at ${path}.`,
-						"Edit it directly, or pass --force to overwrite with a fresh template.",
-					);
-				}
 				mkdirSync(dirname(path), { recursive: true });
-				writeFileSync(path, `${JSON.stringify(PLACEHOLDER_MAP, null, 2)}\n`, { mode: 0o600 });
-				chmodSync(path, 0o600);
+				// Atomically open the target: `wx` fails with EEXIST if the file already
+				// exists, collapsing the exists-check and the create into one syscall (no
+				// TOCTOU window for a symlink swap). `--force` opts into truncate-overwrite.
+				// We then operate on the fd, so the 0600 bits can never land on a file that
+				// was swapped out between open and chmod.
+				let fd: number;
+				try {
+					fd = openSync(path, opts.force ? "w" : "wx", 0o600);
+				} catch (err) {
+					if (!opts.force && (err as NodeJS.ErrnoException).code === "EEXIST") {
+						throw new ValidationError(
+							`A map already exists at ${path}.`,
+							"Edit it directly, or pass --force to overwrite with a fresh template.",
+						);
+					}
+					throw err;
+				}
+				try {
+					writeFileSync(fd, `${JSON.stringify(PLACEHOLDER_MAP, null, 2)}\n`);
+					fchmodSync(fd, 0o600);
+				} finally {
+					closeSync(fd);
+				}
 
 				// Best-effort: print candidates so the user can fill the map. Skip silently if Merit auth is absent.
 				let accounts: unknown;
