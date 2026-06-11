@@ -18,7 +18,8 @@ name: Release
 #   org-level trusted publisher for the scope, or run one manual `npm publish` and then
 #   enable trusted publishing. After that, every release publishes tokenlessly.
 #
-# Requires npm >= 11.5.1 (Trusted Publishing); setup-node with Node 20 ships a new-enough npm.
+# Requires npm >= 11.5.1 (Trusted Publishing). Node 20 bundles npm 10.x, which can sign
+# provenance but has NO OIDC auth path (the registry PUT 404s), so we upgrade npm explicitly.
 
 on:
   release:
@@ -42,6 +43,8 @@ jobs:
           node-version: "20"
           registry-url: "https://registry.npmjs.org"
           cache: "pnpm"
+      - name: Upgrade npm for Trusted Publishing (OIDC needs npm >= 11.5.1; Node 20 ships npm 10.x)
+        run: npm install -g npm@latest
       - run: pnpm install --frozen-lockfile
       - name: Sync version from the release tag
         env:
