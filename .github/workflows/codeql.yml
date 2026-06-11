@@ -1,0 +1,42 @@
+# CodeQL Security Scanning
+#
+# SAST for this TypeScript codebase using GitHub's CodeQL engine. This package signs
+# requests with a secret API key and handles credentials, so static analysis of the
+# source is exactly the control to run before going public.
+# Evidence: Security tab > Code scanning alerts
+
+name: CodeQL Security Analysis
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Weekly on Sundays at 3:00 AM UTC
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze TypeScript
+    if: ${{ github.repository_visibility == 'public' }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: javascript-typescript
+          queries: security-extended
+      - uses: github/codeql-action/autobuild@v4
+      - uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:javascript-typescript"

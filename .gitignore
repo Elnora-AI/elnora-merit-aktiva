@@ -1,0 +1,34 @@
+# Node.js
+node_modules/
+*.tgz
+
+# Build output
+dist/
+build/
+
+# Environment files (secrets — never commit)
+.env
+.env.local
+.env.*.local
+
+# Reconcile config + ledger (populated copies live in ~/.config; never commit local ones)
+stripe-map.json
+reconcile-ledger.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Coverage
+coverage/
+
+# Logs
+*.log
+
+# Scratch / harvested docs
+.firecrawl/
+.docs-cache/

@@ -1,0 +1,20 @@
+{
+  "_comment": "Stripe → Merit reconcile mapping. Copy to ~/.config/elnora-merit/stripe-map.json (or pass --map) and fill in YOUR values — the account codes/VAT code below are ILLUSTRATIVE, not real. `elnora-merit reconcile init` writes a placeholder and prints candidate account/VAT values from your Merit company. No secrets live here — STRIPE_API_KEY stays in the environment. accounts.clearing = the GL code of the Stripe clearing account (e.g. 1080 'Deposits in transit'). accounts.vatPayable is OPTIONAL and informational only — Merit posts the output VAT implicitly from the revenue line's TaxId; the connector never writes to it. vat.code = a Merit TaxId (Guid) from `taxes list` (the all-zero Guid here is a placeholder). vat.rate is a fraction (0.24 = 24%). vatTimezone sets the VAT-period boundary timezone (Europe/Tallinn for EE, Europe/Warsaw for PL). revenueMemo is the label written on the revenue GL line.",
+  "currency": "EUR",
+  "stripeAccount": "acct_xxx",
+  "cutoffDate": "2026-06-01",
+  "accounts": {
+    "revenue": "4000",
+    "vatPayable": "2310",
+    "stripeFees": "5290",
+    "platformFees": "5290",
+    "refunds": "4001",
+    "clearing": "1080"
+  },
+  "vat": {
+    "rate": 0.24,
+    "code": "00000000-0000-0000-0000-000000000000"
+  },
+  "vatTimezone": "Europe/Tallinn",
+  "revenueMemo": "Card sales (net of VAT)"
+}

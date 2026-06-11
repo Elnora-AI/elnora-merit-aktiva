@@ -1,0 +1,31 @@
+name: Release Please
+
+# Maintains a rolling "release PR" from Conventional Commits on main. Merging that PR
+# bumps the version (package.json + .claude-plugin/plugin.json + marketplace.json via
+# release-please-config.json extra-files), updates CHANGELOG.md, tags, and publishes a
+# GitHub Release. The published release then triggers release.yml, which publishes to npm.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release-please-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    name: Release Please
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v5
+        with:
+          # A PAT in RELEASE_TOKEN lets the release PR trigger CI; falls back to the
+          # built-in GITHUB_TOKEN (PRs it opens won't re-trigger workflows, which is fine).
+          token: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json

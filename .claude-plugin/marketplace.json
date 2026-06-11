@@ -1,0 +1,27 @@
+{
+  "name": "elnora-merit-aktiva",
+  "description": "Merit Aktiva accounting for Claude Code — single-plugin marketplace.",
+  "owner": {
+    "name": "Elnora AI",
+    "email": "opensource@elnora.ai",
+    "url": "https://github.com/Elnora-AI"
+  },
+  "plugins": [
+    {
+      "name": "merit-aktiva-workspace",
+      "description": "Merit Aktiva accounting + Merit Palk payroll for Claude Code — full API coverage via the elnora-merit CLI, plus how-to skills for the correct procedure (accounting: sales/purchase invoices, payments/bank, VAT/KMD, reports, reverse charge; payroll: employees, salaries/absences, reports, settings), agents, and slash commands.",
+      "source": "./",
+      "version": "0.1.0",
+      "category": "productivity",
+      "tags": [
+        "merit-aktiva",
+        "merit-palk",
+        "accounting",
+        "payroll",
+        "estonia",
+        "invoicing",
+        "e-invoice"
+      ]
+    }
+  ]
+}
