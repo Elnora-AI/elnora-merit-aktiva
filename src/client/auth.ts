@@ -9,7 +9,7 @@
 // loadEnvFile() hydrates process.env from the env files WITHOUT overwriting any
 // variable that is already set, so a real env var always wins.
 
-import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { closeSync, fchmodSync, mkdirSync, openSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { createInterface, type Interface } from "node:readline/promises";
@@ -37,9 +37,14 @@ export interface MeritCredentials {
 // Parse a `KEY=value` env file. Skips blank lines and `#` comments. Strips
 // surrounding single/double quotes. Does NOT mutate process.env.
 function parseEnvFile(path: string): Record<string, string> {
-	if (!existsSync(path)) return {};
 	const out: Record<string, string> = {};
-	const content = readFileSync(path, "utf8");
+	let content: string;
+	try {
+		content = readFileSync(path, "utf8");
+	} catch (err) {
+		if ((err as NodeJS.ErrnoException).code === "ENOENT") return {};
+		throw err;
+	}
 	for (const rawLine of content.split("\n")) {
 		const line = rawLine.trim();
 		if (!line || line.startsWith("#")) continue;
@@ -103,7 +108,12 @@ export interface GetCredentialsOptions {
  */
 function saveCredentialsToEnvFile(values: Record<string, string>, path: string = HOME_ENV_FILE): void {
 	mkdirSync(dirname(path), { recursive: true });
-	const existing = existsSync(path) ? readFileSync(path, "utf8") : "";
+	let existing = "";
+	try {
+		existing = readFileSync(path, "utf8");
+	} catch (err) {
+		if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
+	}
 	const lines = existing === "" ? [] : existing.split("\n");
 	// Drop a single trailing empty line so we don't accumulate blank lines on resave.
 	if (lines.length > 0 && lines[lines.length - 1] === "") lines.pop();
@@ -121,8 +131,15 @@ function saveCredentialsToEnvFile(values: Record<string, string>, path: string =
 	for (const [key, value] of Object.entries(remaining)) {
 		updated.push(`${key}=${value}`);
 	}
-	writeFileSync(path, `${updated.join("\n")}\n`, { mode: 0o600 });
-	chmodSync(path, 0o600);
+	// Write and tighten permissions through a single fd so the 0600 bits always land
+	// on the file we just wrote, never on one swapped in between write and chmod.
+	const fd = openSync(path, "w", 0o600);
+	try {
+		writeFileSync(fd, `${updated.join("\n")}\n`);
+		fchmodSync(fd, 0o600);
+	} finally {
+		closeSync(fd);
+	}
 }
 
 async function promptHidden(label: string): Promise<string> {
