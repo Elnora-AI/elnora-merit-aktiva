@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.0...v0.1.1) (2026-06-11)
+
+
+### Bug Fixes
+
+* close TOCTOU file races flagged by CodeQL (js/file-system-race) ([#4](https://github.com/Elnora-AI/elnora-merit-aktiva/issues/4)) ([33d948d](https://github.com/Elnora-AI/elnora-merit-aktiva/commit/33d948db60d7ce62dc805663346f22dbee11456b))
+
 ## 0.1.0
 
 Initial release.
