@@ -1,6 +1,6 @@
 ---
 name: merit-payments-bank
-version: 1.0.0
+version: 1.1.0
 description: >
   How to record payments and reconcile the bank statement correctly in Merit Aktiva
   (maksed / pank) via the elnora-merit CLI. The core skill is choosing the right
@@ -71,6 +71,38 @@ elnora-merit payments create-purchase --data '{"BankId":"<bankId>","VendorName":
 Same command for a payment to the tax authority (the vendor is the Tax & Customs Board)
 and for paying a reporting person.
 
+## Reconcile a tax-authority payment (EE single tax account)
+
+Estonia runs a **single tax account** (ühtne maksukonto): you pay one lump sum to the Tax
+& Customs Board (Maksu- ja Tolliamet) and it covers whatever is declared — VAT (KMD),
+payroll taxes (TSD), etc. Two things bite in the bank import:
+
+1. **The UI blocks booking a tax payment as a plain GL / "Muud" entry.** Trying it returns:
+   *"Maksude tasumist ei saa sisestada pearaamatu kandena. Maksude tasumiseks klõpsa nupule
+   'Võlgnevused', vali tarnijate nimekirjast Maksu- ja Tolliamet, märgi võlgnevus linnukesega
+   tasutuks või sisesta summa ettemaksu reale."* Tax payments are matched under
+   **Võlgnevused** against the **tax-authority vendor**, never "Muud".
+
+2. **Match the declared return against the standing prepayment credits.** In the Võlgnevused
+   window pick the tax-authority vendor. Merit lists, against that vendor, both:
+   - **declared return liabilities** as positive debts — e.g. a VAT-return row `KD-MM-YYYY`
+     (käibedeklaratsioon) due the **20th** of the following month, and
+   - **accumulated prepayment credits** as negative rows (`Ettemaks KD-…`) sitting on the
+     tax prepayment account from earlier over-payments.
+
+   Tick the rows that make up the payment. The return liability **nets against the prepayment
+   credits**, and the remainder must equal the bank amount — **Erinevus = 0,00** before you
+   save. Example: a `680,42` VAT return less `98,45` of standing prepayment credits = `581,97`
+   actually paid from the bank.
+
+3. **If nothing is declared yet**, enter the amount on the **"Ettemaksu summa" (prepayment)
+   row** against the tax vendor — it lands on the tax prepayment account, and the next
+   declaration nets against it.
+
+A bank line already in the import queue must be matched **in the UI** as above. The CLI
+mirror is `create-purchase` (against the tax vendor) or `send-prepayment-vendor` (prepayment
+route), but don't *also* post it via the CLI for a queued statement row — that double-books.
+
 ## Other income / expenditure (no invoice)
 
 GL-account lines under a bank. Income lines omit `DepartmentCode`; expense lines include it:
@@ -117,8 +149,9 @@ elnora-merit payments list-imports <bankId> --booking-date-from 2026-06-01  # wi
 
 ## Don't
 
-- Don't book a tax-authority or reporting-person payment as "other expenditure" — it's a
-  **vendor** transaction (`create-purchase`).
+- Don't book a tax-authority or reporting-person payment as "other expenditure" / a GL
+  "Muud" entry — it's a **vendor** transaction (`create-purchase`), and the UI rejects the
+  GL route outright. Match it under **Võlgnevused** against the tax vendor.
 - Don't expect the CLI to confirm imported statement rows — the match/confirm is UI-only.
 - Don't mark a bank-paid invoice as paid twice (inline on the invoice **and** in the
   imported statement) — reconcile it once, in the statement.
