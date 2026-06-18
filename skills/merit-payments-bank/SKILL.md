@@ -92,7 +92,7 @@ payroll taxes (TSD), etc. Two things bite in the bank import:
 
    Tick the rows that make up the payment. The return liability **nets against the prepayment
    credits**, and the remainder must equal the bank amount — **Erinevus = 0,00** before you
-   save. Example: a `680,42` VAT return less `98,45` of standing prepayment credits = `581,97`
+   save. Example: a `500,00` VAT return less `120,00` of standing prepayment credits = `380,00`
    actually paid from the bank.
 
 3. **If nothing is declared yet**, enter the amount on the **"Ettemaksu summa" (prepayment)
