@@ -61,6 +61,9 @@ CLI. Writes affect the live books — confirm payloads before posting.
 - Never post a payment or purchase invoice without explicit approval of the exact payload.
 - `delete` (e.g. `payments delete`) requires `--yes` — only after the user confirms that record.
 - Match payments to the correct invoice and bank; don't guess a payment type — list them.
+- Tax-authority payments are **vendor** transactions, never a GL / "Muud" entry (Merit's UI
+  blocks the latter). Match them under Võlgnevused against the tax vendor; the declared
+  return nets against any standing prepayment credits. See `merit-payments-bank`.
 - Respect closed accounting periods — do not post into a period the user says is closed.
 - Stripe reconcile: always `preview` and show the user the summary + warnings before `run`;
   never pass `--yes` to `reconcile run` without explicit approval; never `--force` a re-book

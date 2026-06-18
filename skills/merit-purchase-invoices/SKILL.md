@@ -1,6 +1,6 @@
 ---
 name: merit-purchase-invoices
-version: 1.0.0
+version: 1.1.0
 description: >
   How to enter vendor bills (ostuarve) correctly in Merit Aktiva via the elnora-merit
   CLI — vendor resolution, invoice rows + VAT, posting straight to the ledger vs the
@@ -100,6 +100,21 @@ elnora-merit purchase-invoices create-pending --file bill.json  # awaits approva
 - Attach the source receipt as `Attachment: { FileName, FileContent }` (valid Base64 PDF
   — broken Base64 is a common server-side failure).
 - `--v2` adds header/row `Dimensions` and `Receiver` support.
+- To verify the attachment landed, fetch the invoice back with `--v2` (the v2 `get` returns
+  the Base64 `Attachment`; the v1 `get` omits it).
+
+## Representation vs ordinary expense (EE)
+
+A common, costly miscoding when you pick the expense account: **food / catering at an event
+you sell tickets to** (training, seminar, conference, hackathon) is an **ordinary deductible
+expense with full input-VAT recovery**, *not* representation (vastuvõtukulud, TuMS § 49).
+EMTA's test is the **contractual relationship**: representation is hosting **guests or
+business partners you have no contract with**; paying ticket-holders are customers, so
+catering provided to them is a direct cost of the taxable service sold. Book it to a normal
+event / operating-expense account, deduct the input VAT, and keep evidence the catering was
+part of the paid package available to all attendees. A separate free, invite-only dinner for
+partners / sponsors *is* representation (TuMS § 49 monthly limit, input VAT restricted).
+Source: EMTA TSD handbook, TuMS § 49.
 
 ## Purchase credit note
 
