@@ -1,9 +1,10 @@
 ---
 name: merit-vat-kmd
-version: 1.1.0
+version: 1.2.0
 description: >
   How VAT and the Estonian VAT return (käibedeklaratsioon / KMD) work in Merit Aktiva, and
-  how to get them right from the elnora-merit CLI. Covers the tax-code model, what feeds
+  how to get them right from the elnora-merit CLI. Covers the tax-code model, paying the
+  VAT, what feeds
   each KMD line, time-of-supply, and pulling supporting VAT figures. The KMD itself is
   generated and filed in the Merit UI — the API has no KMD endpoint.
   Use when: preparing or checking the VAT return, choosing a VAT/tax code, understanding a
@@ -81,6 +82,16 @@ is always the **calendar month**. Estonian KMS §11 tax-point rules (e.g. prepay
 tax point at receipt) are not enforced by the UI — set the line/invoice dates so the
 amount lands in the correct month. Your books reference states any standing rule (e.g.
 prepaid items declared by payment month).
+
+## Paying the KMD
+
+There is no pay-the-tax endpoint beyond the normal bank flow. When you pay the VAT, the KMD
+liability appears in the bank-import **Võlgnevused** window as a `KD-MM-YYYY` debt against the
+**tax-authority vendor (Maksu- ja Tolliamet)**, due the **20th** of the following month. Match
+the payment there — Merit nets it against any standing tax-account prepayment credits
+(`Ettemaks KD-…` rows), so the figure you actually paid can be less than the return total.
+Do **not** book it as a GL / "Muud" entry; the UI blocks tax payments from the general ledger.
+Full mechanics in `merit-payments-bank`.
 
 ## Generate / file the KMD (UI) — and what the CLI gives you
 
