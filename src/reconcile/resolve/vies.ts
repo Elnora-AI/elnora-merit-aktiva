@@ -3,7 +3,7 @@
 // äriregister match before we book a real invoice to that entity.
 //
 // Endpoint: POST https://ec.europa.eu/taxation_customs/vies/rest-api/check-vat-number
-// Body: { countryCode: "EE", vatNumber: "100030417" }  (digits only, no country prefix)
+// Body: { countryCode: "EE", vatNumber: "100000001" }  (digits only, no country prefix)
 //
 // CRITICAL: VIES is a real-time proxy to each national database. A member-state outage
 // returns an error, NOT valid:false — treating that as "invalid" would be a false
@@ -33,8 +33,8 @@ interface ViesResponse {
 }
 
 /**
- * Split an EE VAT id into the VIES (countryCode, vatNumber) pair. Accepts "EE100030417"
- * or a bare "100030417". Returns null if it has no usable digits.
+ * Split an EE VAT id into the VIES (countryCode, vatNumber) pair. Accepts "EE100000001"
+ * or a bare "100000001". Returns null if it has no usable digits.
  */
 export function splitVatId(vat: string): { countryCode: string; vatNumber: string } | null {
 	const trimmed = vat.trim().toUpperCase().replace(/\s+/g, "");

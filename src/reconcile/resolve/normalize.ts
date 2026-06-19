@@ -2,11 +2,11 @@
 //
 // The matching problem: a Stripe charge carries an email (and rarely a name), and
 // we must tie it to an Estonian legal entity in the business register, whose legal
-// name almost never equals the email domain ("bondora.com" → "Bondora AS"). We match
+// name almost never equals the email domain ("acme.ee" → "Acme Industries AS"). We match
 // on a normalized COMPACT form: lowercase, diacritics folded to ASCII (so an ASCII
 // domain token matches a name with õäöü), legal-form words dropped ("OÜ", "AS", …),
-// and every non-alphanumeric character removed. "1Office Estonia OÜ" → "1officeestonia",
-// "Nanordica Medical OÜ" → "nanordicamedical", "Õun AS" → "oun".
+// and every non-alphanumeric character removed. "Acme Estonia OÜ" → "acmeestonia",
+// "Globex Medical OÜ" → "globexmedical", "Õunake AS" → "ounake".
 
 // Estonian (and a few PL) legal-form words to drop from a company name before compacting.
 // Stored DIACRITICS-FOLDED ("oü" → "ou") because compactName folds the name first and
@@ -44,7 +44,7 @@ export function foldDiacritics(s: string): string {
 /**
  * Compact a company name to its match key: lowercase, diacritics folded, legal-form
  * words removed, all non-alphanumerics stripped. Returns "" for a name that is only
- * a legal form. Example: "Reverse Resources OÜ" → "reverseresources".
+ * a legal form. Example: "Globex Resources OÜ" → "globexresources".
  */
 export function compactName(name: string): string {
 	const folded = foldDiacritics(name.toLowerCase());
@@ -62,8 +62,8 @@ export function hasLegalFormWord(name: string): boolean {
 
 /**
  * The match token for an email domain: the registrable label (the part before the
- * public suffix), diacritics folded, non-alphanumerics stripped. "ragnar@1office.co"
- * → "1office"; "h@oixio.eu" → "oixio"; "x@mail.sub.acme.ee" → "acme". Heuristic: the
+ * public suffix), diacritics folded, non-alphanumerics stripped. "a@globex.co"
+ * → "globex"; "h@umbrella.eu" → "umbrella"; "x@mail.sub.acme.ee" → "acme". Heuristic: the
  * second-to-last dot-separated label (good enough for the flat TLDs we see; multi-part
  * suffixes like co.uk are rare for EE buyers and fall through to review anyway).
  */
