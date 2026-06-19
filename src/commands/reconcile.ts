@@ -16,7 +16,7 @@ import { getClient } from "../client/index.js";
 import { getStripeClient, type StripeClient } from "../client/stripe-client.js";
 import { loadStripeMap, PLACEHOLDER_MAP, resolveMapPath } from "../config/stripe-map.js";
 import { handleAsyncCommand, outputSuccess } from "../output/index.js";
-import { fetchPayoutBatch, fetchPayouts } from "../reconcile/fetch.js";
+import { enrichChargeIdentity, fetchPayoutBatch, fetchPayouts } from "../reconcile/fetch.js";
 import {
 	DEFAULT_LEDGER_PATH,
 	isBooked,
@@ -28,7 +28,12 @@ import {
 import { formatMinor } from "../reconcile/money.js";
 import { type PayoutPlan, planPayout } from "../reconcile/plan.js";
 import { executePlan } from "../reconcile/post.js";
-import type { StripeMap, StripePayout } from "../reconcile/types.js";
+import { AriregIndex, ensureAriregCsv } from "../reconcile/resolve/arireg.js";
+import { loadOverrides } from "../reconcile/resolve/overrides.js";
+import { resolveBuyer } from "../reconcile/resolve/resolver.js";
+import type { Resolution } from "../reconcile/resolve/types.js";
+import { validateVat } from "../reconcile/resolve/vies.js";
+import type { ChargeItem, StripeMap, StripePayout } from "../reconcile/types.js";
 import { requireYes, ValidationError } from "../utils/index.js";
 
 /** Refuse to run against the wrong Stripe account when the map pins one. */
@@ -83,6 +88,31 @@ function summarize(plan: PayoutPlan, booked: boolean): Record<string, unknown> {
 		bookable: plan.bookable,
 		alreadyBooked: booked,
 		warnings: plan.warnings,
+	};
+}
+
+/** Compact per-charge resolution summary for the `resolve` command output. */
+function summarizeResolution(charge: ChargeItem, r: Resolution): Record<string, unknown> {
+	const invoiceLike = (charge.description ?? "").toLowerCase().includes("invoice");
+	return {
+		email: charge.buyerEmail,
+		name: charge.buyerName,
+		stripeName: charge.companyName,
+		stripeVat: charge.vatId,
+		gross: formatMinor(charge.grossMinor),
+		description: charge.description,
+		tier: r.tier,
+		company: r.company ? { name: r.company.name, regNo: r.company.regNo, vat: r.company.vat } : null,
+		vies: r.vies ? { valid: r.vies.valid, name: r.vies.name, note: r.vies.note } : undefined,
+		// Candidates matter most when a human must pick — surface them for the review tier.
+		candidates:
+			r.tier === "review"
+				? r.candidates.map((c) => ({ name: c.name, regNo: c.regNo, vat: c.vat, reason: c.matchReason }))
+				: undefined,
+		reason: r.reason,
+		// A charge described as an invoice payment may already have a hand-booked invoice —
+		// flag it so backfill does not double-book.
+		flags: invoiceLike ? ["description mentions an invoice — verify it isn't already booked manually"] : undefined,
 	};
 }
 
@@ -181,6 +211,85 @@ export function setupReconcileCommand(program: Command): void {
 				}
 				outputSuccess({ mode: "preview", count: summaries.length, payouts: summaries });
 			}),
+		);
+
+	// resolve — read-only: classify each charge's buyer (EE business / private / review).
+	grp
+		.command("resolve")
+		.description(
+			"Classify each Stripe charge's buyer against the Estonian business register (äriregister) + VIES — READ-ONLY, no writes. Shows which charges should become customer sales invoices (so they reach KMD INF) vs which stay in the anonymous summary, plus a review list of ambiguous buyers. Use --payout or --since.",
+		)
+		.option("--map <path>", "Path to the stripe map")
+		.option("--payout <id>", "Resolve a single payout (po_...)")
+		.option("--since <date>", "Only payouts on/after this date (YYYY-MM-DD); defaults to the map cutoff")
+		.option("--overrides <path>", "Resolver overrides JSON (default ~/.config/elnora-merit/arireg-overrides.json)")
+		.option("--arireg-cache <path>", "Cached äriregister CSV (default ~/.config/elnora-merit/arireg-lihtandmed.csv)")
+		.option("--refresh-cache", "Force a re-download of the äriregister open data before resolving")
+		.option("--max-age-days <n>", "Re-download the äriregister cache when older than this many days (default 7)")
+		.option("--no-vies", "Skip VIES VAT validation (faster; works offline)")
+		.action(
+			handleAsyncCommand(
+				async (opts: {
+					map?: string;
+					payout?: string;
+					since?: string;
+					overrides?: string;
+					ariregCache?: string;
+					refreshCache?: boolean;
+					maxAgeDays?: string;
+					vies?: boolean;
+				}) => {
+					const map = loadStripeMap(opts.map);
+					const stripe = getStripeClient();
+					await assertAccount(stripe, map);
+					const csvPath = await ensureAriregCsv({
+						cachePath: opts.ariregCache?.trim() || undefined,
+						refresh: opts.refreshCache,
+						maxAgeDays: opts.maxAgeDays ? Number(opts.maxAgeDays) : undefined,
+					});
+					const arireg = AriregIndex.fromCsv(csvPath);
+					const overrides = loadOverrides(opts.overrides?.trim() || undefined);
+					const viesFn = opts.vies === false ? undefined : (vat: string) => validateVat(vat);
+
+					const payouts = await resolvePayouts(stripe, map, opts.payout, opts.since);
+					const items: Record<string, unknown>[] = [];
+					const totals: Record<Resolution["tier"], { count: number; grossMinor: number }> = {
+						confirmed: { count: 0, grossMinor: 0 },
+						review: { count: 0, grossMinor: 0 },
+						private: { count: 0, grossMinor: 0 },
+					};
+					for (const payout of payouts) {
+						const batch = await fetchPayoutBatch(stripe, payout);
+						await enrichChargeIdentity(stripe, batch.charges);
+						for (const c of batch.charges) {
+							const r = await resolveBuyer(
+								{
+									name: c.buyerName,
+									email: c.buyerEmail,
+									country: c.billing.country,
+									companyName: c.companyName,
+									vatId: c.vatId,
+								},
+								{ arireg, overrides, vies: viesFn },
+							);
+							totals[r.tier].count += 1;
+							totals[r.tier].grossMinor += c.grossMinor;
+							items.push({ payoutId: payout.id, ...summarizeResolution(c, r) });
+						}
+					}
+					outputSuccess({
+						mode: "resolve",
+						ariregCompanies: arireg.size,
+						charges: items.length,
+						totals: {
+							confirmed: { count: totals.confirmed.count, gross: formatMinor(totals.confirmed.grossMinor) },
+							review: { count: totals.review.count, gross: formatMinor(totals.review.grossMinor) },
+							private: { count: totals.private.count, gross: formatMinor(totals.private.grossMinor) },
+						},
+						items,
+					});
+				},
+			),
 		);
 
 	// run — write to Merit. Gated by --yes and the idempotency ledger.
