@@ -35,6 +35,7 @@ export interface StripeCharge {
 		} | null;
 	};
 	customer?: string | null;
+	invoice?: string | null;
 	metadata?: Record<string, string>;
 }
 
@@ -72,6 +73,15 @@ export interface ChargeItem {
 	// charge metadata key `invoice_no` when present (lets the connector reconcile
 	// to a human-entered invoice instead of creating a new one).
 	invoiceNoHint: string | null;
+	// Stripe object ids behind the charge, used by identity enrichment to pull the
+	// authoritative buyer name / VAT id (the Customer or Invoice the buyer filled in).
+	customerId: string | null;
+	invoiceId: string | null;
+	// Filled by enrichChargeIdentity (not the initial fetch): the buyer-entered company
+	// name and EU VAT id from the Stripe Customer/Invoice — the strongest identity signal,
+	// far better than the often-empty billing_details. Null when Stripe holds neither.
+	companyName: string | null;
+	vatId: string | null;
 }
 
 /** A payout's transactions classified into booking buckets. All amounts minor units. */
@@ -116,4 +126,17 @@ export interface StripeMap {
 	// Memo written onto the revenue GL line of every booked payout. Defaults to a generic
 	// label; set it to describe your own sales (e.g. "Online card sales (net of VAT)").
 	revenueMemo?: string;
+	// --- Rebooking (customer-invoice) settings — used by `reconcile rebook` only. ---
+	// Invoice-number series for the auto-created müügiarved; "{year}" is substituted with
+	// the charge year. Default "STR-{year}-" → STR-2026-0001. Keep it distinct from your
+	// hand-issued invoice numbers so they never collide.
+	invoiceSeries?: string;
+	// Accounts-receivable control account the müügiarve debits and the per-payout GL batch
+	// then clears into the Stripe clearing account. Default "1200".
+	arAccount?: string;
+	// Optional: a Merit payment-method (BankId) bound to the Stripe clearing account. When
+	// set, each müügiarve is marked PAID via this method (clean sales sub-ledger). When
+	// absent, the per-payout GL batch clears the invoice A/R into the clearing account
+	// instead (the invoices then show as open in the sales ledger, but the GL is correct).
+	clearingPaymentMethod?: string;
 }

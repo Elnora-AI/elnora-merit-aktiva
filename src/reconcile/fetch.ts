@@ -77,6 +77,11 @@ export async function fetchPayoutBatch(client: StripeClient, payout: StripePayou
 					// (future work); until then the configured rate does the VAT split.
 					stripeTaxMinor: null,
 					invoiceNoHint: src?.metadata?.invoice_no ?? null,
+					customerId: src?.customer ?? null,
+					invoiceId: src?.invoice ?? null,
+					// Filled by enrichChargeIdentity (a separate, opt-in pass).
+					companyName: null,
+					vatId: null,
 				});
 				break;
 			}
@@ -106,6 +111,79 @@ export async function fetchPayoutBatch(client: StripeClient, payout: StripePayou
 		otherFeesMinor,
 		currency: payout.currency,
 	};
+}
+
+interface StripeTaxId {
+	type?: string;
+	value?: string;
+}
+interface StripeCustomerObj {
+	id: string;
+	name?: string | null;
+	address?: { country?: string | null } | null;
+	tax_ids?: { data?: StripeTaxId[] } | null;
+}
+interface StripeInvoiceObj {
+	id: string;
+	customer_name?: string | null;
+	customer_address?: { country?: string | null } | null;
+	customer_tax_ids?: StripeTaxId[] | null;
+}
+
+/** Pick the EU VAT id from a Stripe tax_ids list, else the first id with a value. */
+function pickEuVat(taxIds: StripeTaxId[] | undefined | null): string | null {
+	if (!taxIds || taxIds.length === 0) return null;
+	const eu = taxIds.find((t) => t.type === "eu_vat" && t.value) ?? taxIds.find((t) => t.value);
+	return eu?.value ?? null;
+}
+
+/**
+ * Enrich charges in place with the buyer's company name + VAT id from the Stripe Customer
+ * and Invoice objects — the authoritative identity the buyer entered, far stronger than the
+ * usually-empty billing_details. Opt-in (not run by preview/run, which only summarise):
+ * the identity resolver and the invoicing path call it. Fetches are cached per id and
+ * failures are swallowed (enrichment is best-effort; a missing customer just stays null).
+ */
+export async function enrichChargeIdentity(client: StripeClient, charges: ChargeItem[]): Promise<void> {
+	const custCache = new Map<string, StripeCustomerObj | null>();
+	const invCache = new Map<string, StripeInvoiceObj | null>();
+	for (const c of charges) {
+		// Prefer the Invoice (an explicit billing document) over the bare Customer.
+		if (c.invoiceId) {
+			let inv = invCache.get(c.invoiceId);
+			if (inv === undefined) {
+				try {
+					inv = await client.get<StripeInvoiceObj>(`invoices/${encodeURIComponent(c.invoiceId)}`);
+				} catch {
+					inv = null;
+				}
+				invCache.set(c.invoiceId, inv);
+			}
+			if (inv) {
+				c.companyName = inv.customer_name ?? c.companyName;
+				c.vatId = pickEuVat(inv.customer_tax_ids) ?? c.vatId;
+				if (!c.billing.country && inv.customer_address?.country) c.billing.country = inv.customer_address.country;
+			}
+		}
+		if (c.customerId) {
+			let cust = custCache.get(c.customerId);
+			if (cust === undefined) {
+				try {
+					cust = await client.get<StripeCustomerObj>(`customers/${encodeURIComponent(c.customerId)}`, {
+						"expand[]": "tax_ids",
+					});
+				} catch {
+					cust = null;
+				}
+				custCache.set(c.customerId, cust);
+			}
+			if (cust) {
+				if (!c.companyName) c.companyName = cust.name ?? null;
+				if (!c.vatId) c.vatId = pickEuVat(cust.tax_ids?.data);
+				if (!c.billing.country && cust.address?.country) c.billing.country = cust.address.country;
+			}
+		}
+	}
 }
 
 /**

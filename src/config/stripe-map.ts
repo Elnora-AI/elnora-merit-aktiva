@@ -85,6 +85,12 @@ export function loadStripeMap(flagPath?: string, env: NodeJS.ProcessEnv = proces
 		vat: { rate: vat.rate, code: vat.code as string },
 		vatTimezone: typeof parsed.vatTimezone === "string" ? parsed.vatTimezone : undefined,
 		revenueMemo: typeof parsed.revenueMemo === "string" ? parsed.revenueMemo : undefined,
+		invoiceSeries: typeof parsed.invoiceSeries === "string" ? parsed.invoiceSeries : undefined,
+		arAccount: typeof parsed.arAccount === "string" && parsed.arAccount ? parsed.arAccount : undefined,
+		clearingPaymentMethod:
+			typeof parsed.clearingPaymentMethod === "string" && parsed.clearingPaymentMethod
+				? parsed.clearingPaymentMethod
+				: undefined,
 	};
 }
 
