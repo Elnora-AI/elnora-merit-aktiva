@@ -11,7 +11,7 @@
       "name": "merit-aktiva-workspace",
       "description": "Merit Aktiva accounting + Merit Palk payroll for Claude Code — full API coverage via the elnora-merit CLI, plus how-to skills for the correct procedure (accounting: sales/purchase invoices, payments/bank, VAT/KMD, reports, reverse charge; payroll: employees, salaries/absences, reports, settings), agents, and slash commands.",
       "source": "./",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "category": "productivity",
       "tags": [
         "merit-aktiva",
