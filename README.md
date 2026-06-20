@@ -64,6 +64,20 @@ Or copy [`.env.template`](.env.template) to `.env` and fill it in (`.env` is git
 | `MERIT_API_VERSION` | no | `v1` (default) or `v2` for dual-version endpoints |
 | `MERIT_PALK_API_ID` | for `palk` | Merit Palk API ID (separate payroll product) |
 | `MERIT_PALK_API_KEY` | for `palk` | Merit Palk API key (base64 secret) |
+| `MERIT_REFERENCES_DIR` | no | Base dir for config + reference files (stripe map, ledger, overrides, `company-profile.json`). Default `~/.config/elnora-merit`. |
+
+### Company profile (optional)
+
+Snapshot your account's own chart of accounts, banks, VAT codes, and financial years so
+an agent (or you) can look up the real codes without transcribing them by hand:
+
+```bash
+elnora-merit profile sync                  # → company-profile.json (in MERIT_REFERENCES_DIR)
+elnora-merit profile show --section taxes  # the VAT TaxId guids, etc.
+```
+
+`company-profile.json` holds no secrets but is company-specific, so it is gitignored.
+Re-run `profile sync` whenever the chart of accounts changes.
 
 ---
 

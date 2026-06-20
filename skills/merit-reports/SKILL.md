@@ -17,8 +17,9 @@ description: >
 Read-only financial reports via `elnora-merit reports`. Every endpoint is **POST with a
 JSON query body** even though they only read. Dates are `YYYYMMDD`.
 
-> If a company-specific books reference is configured, load it for the period and any
-> standing report conventions.
+> Load the **company profile** (`elnora-merit profile sync` → `company-profile.json`) for the
+> real account/financial-year codes, plus any prose books reference for standing report
+> conventions, before relying on this.
 
 ## Which report
 

@@ -11,16 +11,17 @@
 // validates the VAT independently.
 
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
-import { homedir } from "node:os";
-import { dirname, join } from "node:path";
+import { dirname } from "node:path";
 import { unzipSync } from "fflate";
+import { configPath } from "../../config/config-dir.js";
 import { compactName } from "./normalize.js";
 import type { AriregCompany, CompanyCandidate, MatchReason } from "./types.js";
 
 export const ARIREG_ZIP_URL =
 	"https://avaandmed.ariregister.rik.ee/sites/default/files/avaandmed/ettevotja_rekvisiidid__lihtandmed.csv.zip";
 
-export const DEFAULT_ARIREG_CACHE = join(homedir(), ".config", "elnora-merit", "arireg-lihtandmed.csv");
+// Honors MERIT_REFERENCES_DIR (default ~/.config/elnora-merit).
+export const DEFAULT_ARIREG_CACHE = configPath("arireg-lihtandmed.csv");
 
 /** Default freshness window for the cached CSV before a re-download is attempted. */
 const DEFAULT_MAX_AGE_DAYS = 7;

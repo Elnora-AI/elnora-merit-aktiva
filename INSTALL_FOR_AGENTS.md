@@ -155,7 +155,18 @@ elnora-merit reconcile run --yes                # writes; idempotent via a local
 ## 6. Company-specific bookkeeping
 
 The bundled `merit-*` skills carry the **correct Merit method** but no company's account
-numbers. When a task needs real account/VAT codes, look them up live (`accounts list`,
-`taxes list`) rather than guessing. If the user keeps a private "company books reference"
-(their real account map, VAT TaxId, bank, rules), load it alongside the relevant skill
-before posting — but keep that reference in the user's private space, never in this repo.
+numbers. Get the real codes from the **company profile** — a local snapshot of the
+account's own chart of accounts, banks, VAT codes, and financial years:
+
+```bash
+elnora-merit profile sync                 # pull from the live account → company-profile.json
+elnora-merit profile show --section taxes  # e.g. the VAT TaxId guids to use
+```
+
+`profile sync` writes `company-profile.json` into the references directory
+(`MERIT_REFERENCES_DIR`, default `~/.config/elnora-merit`; gitignored, never committed).
+Load it before posting so the right accounts are used; re-sync when the chart of accounts
+changes. The profile holds the machine-readable codes — any prose conventions the user
+keeps (which revenue account, KMD cadence, standing rules) live in their own notes in the
+same references directory. If neither is available, look codes up live (`accounts list`,
+`taxes list`) rather than guessing.

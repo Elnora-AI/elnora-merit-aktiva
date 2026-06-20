@@ -6,11 +6,14 @@
 // has been booked" — back it up alongside the books.
 
 import { chmodSync, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
-import { homedir } from "node:os";
-import { dirname, join } from "node:path";
+import { dirname } from "node:path";
+import { configPath } from "../config/config-dir.js";
 import { ValidationError } from "../utils/errors.js";
 
-export const DEFAULT_LEDGER_PATH = join(homedir(), ".config", "elnora-merit", "reconcile-ledger.json");
+// Honors MERIT_REFERENCES_DIR (default ~/.config/elnora-merit). NB: this file is
+// idempotency state — if you relocate the references dir, move the existing ledger
+// with it, or `run` will re-book payouts it has no record of. `--ledger` overrides.
+export const DEFAULT_LEDGER_PATH = configPath("reconcile-ledger.json");
 
 export interface LedgerEntry {
 	payoutId: string;

@@ -21,8 +21,10 @@ How to book money movements correctly with `elnora-merit payments` and `banks`. 
 hit the live books — confirm before posting. The biggest source of bookkeeping errors is
 picking the **wrong transaction type**; get that right and the GL entry is right.
 
-> If your workspace provides a company books reference (bank ids, clearing accounts, GL
-> account codes), load it before posting.
+> For real bank ids, clearing accounts, and GL codes, load the **company profile**
+> (`elnora-merit profile sync` → `company-profile.json`; `profile show --section banks`).
+> Standing conventions come from your prose books reference if you keep one. Load what
+> applies before posting.
 
 ## The four transaction types → which command
 

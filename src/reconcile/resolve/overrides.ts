@@ -16,11 +16,11 @@
 // company person uses). Otherwise regNo + name are required; vat is optional.
 
 import { existsSync, readFileSync } from "node:fs";
-import { homedir } from "node:os";
-import { join } from "node:path";
+import { configPath } from "../../config/config-dir.js";
 import { ValidationError } from "../../utils/errors.js";
 
-export const DEFAULT_OVERRIDES_PATH = join(homedir(), ".config", "elnora-merit", "arireg-overrides.json");
+// Honors MERIT_REFERENCES_DIR (default ~/.config/elnora-merit).
+export const DEFAULT_OVERRIDES_PATH = configPath("arireg-overrides.json");
 
 export interface OverrideEntry {
 	regNo?: string;

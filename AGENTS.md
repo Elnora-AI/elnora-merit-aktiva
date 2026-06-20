@@ -16,6 +16,24 @@ missing — `MERIT_API_ID` and `MERIT_API_KEY` must be in the environment or
 `~/.config/elnora-merit/.env`. Exit code 6 with `status: 401` and a body of
 `api-wronglicense` means the account is not on a Pro/Premium plan.
 
+## References & company profile
+
+Per-machine config (the Stripe map, the reconcile ledger, resolver overrides, the
+äriregister cache, and the synced `company-profile.json`) lives in the references
+directory: `MERIT_REFERENCES_DIR`, default `~/.config/elnora-merit`. Setting that env
+var relocates the whole set, so the CLI and an agent can share one references home.
+
+For real account/VAT codes, prefer the **company profile** over guessing or transcribing:
+
+```bash
+elnora-merit profile sync                  # snapshot accounts/banks/taxes/years from the live account
+elnora-merit profile show --section taxes  # read a section back as JSON
+```
+
+`profile sync` writes `company-profile.json` (gitignored, no secrets). Load it before
+posting; re-sync when the chart of accounts changes. If it is absent, look codes up live
+(`accounts list`, `taxes list`).
+
 ## Conventions
 
 - **Default output is compact JSON** on stdout. Parse it directly. Add `--fields a,b`

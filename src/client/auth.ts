@@ -2,9 +2,10 @@
 //
 // Resolution precedence (highest first):
 //   1. process.env (MERIT_API_ID / MERIT_API_KEY / MERIT_LOCALIZATION / MERIT_API_VERSION)
-//   2. ~/.config/elnora-merit/.env
-//   3. ./.env in the current working directory (dev convenience)
-//   4. interactive prompt (only if allowPrompt: true and stdin is a TTY)
+//   2. <MERIT_REFERENCES_DIR>/.env  (only when that env var points off the home default)
+//   3. ~/.config/elnora-merit/.env
+//   4. ./.env in the current working directory (dev convenience)
+//   5. interactive prompt (only if allowPrompt: true and stdin is a TTY)
 //
 // loadEnvFile() hydrates process.env from the env files WITHOUT overwriting any
 // variable that is already set, so a real env var always wins.
@@ -14,12 +15,32 @@ import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { createInterface, type Interface } from "node:readline/promises";
 import { Writable } from "node:stream";
+import { DEFAULT_CONFIG_DIR, resolveConfigDir } from "../config/config-dir.js";
 import { type ApiVersion, type Localization, resolveDefaultVersion, resolveLocalization } from "../config/index.js";
 import { AuthError } from "../utils/errors.js";
 import { stripWrappingQuotes } from "../utils/parse.js";
 
+// Credentials are a special case: unlike the non-secret reference files, the saved
+// `.env` stays anchored at the home default so existing installs never lose their
+// keys. When MERIT_REFERENCES_DIR is set, its `.env` is ALSO read, at higher
+// precedence (the user opted into that directory, so it is trusted). Prompt-saves
+// still target the home file (HOME_ENV_FILE) — see saveCredentialsToEnvFile callers.
 const HOME_ENV_FILE = join(homedir(), ".config", "elnora-merit", ".env");
 const CWD_ENV_FILE = join(process.cwd(), ".env");
+
+/**
+ * The ordered env-file search path. When MERIT_REFERENCES_DIR points somewhere other
+ * than the home default, its `.env` is searched FIRST (trusted, opt-in), then the
+ * home `.env`, then the cwd `.env`. First file to define a key wins, and a real
+ * environment variable always wins over all of them (see loadEnvFile).
+ */
+function defaultEnvPaths(env: NodeJS.ProcessEnv = process.env): string[] {
+	const refsDir = resolveConfigDir(env);
+	const paths: string[] = [];
+	if (refsDir !== DEFAULT_CONFIG_DIR) paths.push(join(refsDir, ".env"));
+	paths.push(HOME_ENV_FILE, CWD_ENV_FILE);
+	return paths;
+}
 
 // Credential-setup hint for Merit Palk (payroll) — a separate product from Aktiva, with
 // its own keys and host. Used in every Palk AuthError so the suggestion names the right
@@ -69,10 +90,7 @@ const CWD_DENYLIST = new Set(["MERIT_BASE_URL", "MERIT_PALK_BASE_URL"]);
  * paths (by default the cwd `.env`) may not set base-URL overrides (see
  * CWD_DENYLIST). Safe to call multiple times. Call once at CLI startup.
  */
-export function loadEnvFile(
-	paths: string[] = [HOME_ENV_FILE, CWD_ENV_FILE],
-	untrustedPaths: string[] = [CWD_ENV_FILE],
-): void {
+export function loadEnvFile(paths: string[] = defaultEnvPaths(), untrustedPaths: string[] = [CWD_ENV_FILE]): void {
 	const untrusted = new Set(untrustedPaths);
 	for (const path of paths) {
 		const entries = parseEnvFile(path);
