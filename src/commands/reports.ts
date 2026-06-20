@@ -14,7 +14,7 @@ export function setupReportsCommand(program: Command): void {
 	const grp = program
 		.command("reports")
 		.description(
-			"Read-only financial reports (Merit Aktiva): income statement, balance sheet, inventory, sales, purchase, customer debts, and customer payments. All endpoints are POST with a JSON query body even though they are read operations. Dates are YYYYMMDD strings.",
+			"Read-only financial reports (Merit Aktiva): income statement, balance sheet, inventory, sales, purchase, customer debts, and customer payments. All endpoints are POST with a JSON query body even though they are read operations. Dates are YYYYMMDD strings. NOTE: there is no VAT-return endpoint — the käibedeklaratsioon (KMD) and INF lisa A/B are generated and filed only in the Merit UI; reconstruct figures from the GL/sales/purchase reports or read the posted KD-MM-YYYY GL batch.",
 		);
 
 	// QUERY: income statement. v1. EndDate + PerCount required, optional DepFilter.

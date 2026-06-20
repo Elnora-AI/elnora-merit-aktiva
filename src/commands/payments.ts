@@ -40,7 +40,10 @@ export function setupPaymentsCommand(program: Command): void {
 		.option("--period-start <date>", "Period start (YYYY-MM-DD or YYYYMMDD), required")
 		.option("--period-end <date>", "Period end (YYYY-MM-DD or YYYYMMDD), required, max 3 months from start")
 		.option("--payment-type <n>", "Payment type filter (int)")
-		.option("--bank-id <guid>", "Bank / payment-method id")
+		.option(
+			"--bank-id <guid>",
+			"Payment-method Id from `payments list-types` (NOT the `banks list` BankId — the two sets differ)",
+		)
 		.option("--date-type <n>", "0 = document date, 1 = changed date")
 		.option("--data <json>", "Raw JSON request body (overrides flags)")
 		.option("--file <path>", "Path to a JSON file with the request body")
@@ -82,7 +85,10 @@ export function setupPaymentsCommand(program: Command): void {
 		.option("--period-start <date>", "Period start (YYYY-MM-DD or YYYYMMDD), required")
 		.option("--period-end <date>", "Period end (YYYY-MM-DD or YYYYMMDD), required, max 3 months from start")
 		.option("--payment-type <n>", "Payment type filter (int)")
-		.option("--bank-id <guid>", "Bank / payment-method id")
+		.option(
+			"--bank-id <guid>",
+			"Payment-method Id from `payments list-types` (NOT the `banks list` BankId — the two sets differ)",
+		)
 		.option("--date-type <n>", "0 = document date, 1 = changed date")
 		.option("--data <json>", "Raw JSON request body (overrides flags)")
 		.option("--file <path>", "Path to a JSON file with the request body")
@@ -141,9 +147,12 @@ export function setupPaymentsCommand(program: Command): void {
 	grp
 		.command("create")
 		.description(
-			"Register a payment against a sales invoice. Endpoint: POST /api/v2/sendpayment. Use v2 when the payment is not in local currency (CurrencyCode/CurrencyRate); omit CurrencyRate to use the ECB rate for the date. Subsequent payments are cash or bank — for bank an IBAN matching a stored payment method is required; without an IBAN the payment lands in the cash register. A sales-invoice payment may be sent in several parts.",
+			"Register a payment against a sales invoice. Endpoint: POST /api/v2/sendpayment. Use v2 when the payment is not in local currency (CurrencyCode/CurrencyRate); omit CurrencyRate to use the ECB rate for the date. Subsequent payments are cash or bank — for bank an IBAN matching a stored payment method is required; without an IBAN the payment lands in the cash register. The `--bank-id` is a payment-method Id from `payments list-types` (type 3 = sales), NOT a `banks list` BankId; this is also how you book non-cash settlements such as a small-balance write-off. A sales-invoice payment may be sent in several parts.",
 		)
-		.option("--bank-id <guid>", "Bank / payment-method id")
+		.option(
+			"--bank-id <guid>",
+			"Payment-method Id from `payments list-types` (NOT the `banks list` BankId — the two sets differ)",
+		)
 		.option("--iban <iban>", "IBAN (must match a stored payment method)")
 		.option("--customer-name <name>", "Customer name")
 		.option("--invoice-no <no>", "Sales invoice number")
@@ -205,7 +214,10 @@ export function setupPaymentsCommand(program: Command): void {
 		.description(
 			"Register a payment against a purchase invoice (vendor bill). Endpoint: POST /api/v2/sendPaymentV. The --payment-date flag takes YYYY-MM-DD or YYYYMMDD; pass minute precision (YYYYmmddHHii) via --data. Use v2 when not in local currency (CurrencyCode required; omit CurrencyRate for the ECB rate).",
 		)
-		.option("--bank-id <guid>", "Bank / payment-method id")
+		.option(
+			"--bank-id <guid>",
+			"Payment-method Id from `payments list-types` (NOT the `banks list` BankId — the two sets differ)",
+		)
 		.option("--iban <iban>", "IBAN")
 		.option("--vendor-name <name>", "Vendor name")
 		.option("--bill-no <no>", "Purchase invoice / bill number")
@@ -259,7 +271,10 @@ export function setupPaymentsCommand(program: Command): void {
 		.description(
 			"Register a (pre)payment against a sales offer. Endpoint: POST /api/v2/sendPaymentO. The --payment-date flag takes YYYY-MM-DD or YYYYMMDD; pass minute precision (YYYYmmddHHii) via --data. Use v2 when not in local currency (CurrencyCode required; omit CurrencyRate for the ECB rate).",
 		)
-		.option("--bank-id <guid>", "Bank / payment-method id")
+		.option(
+			"--bank-id <guid>",
+			"Payment-method Id from `payments list-types` (NOT the `banks list` BankId — the two sets differ)",
+		)
 		.option("--iban <iban>", "IBAN")
 		.option("--customer-name <name>", "Customer name")
 		.option("--offer-no <no>", "Sales offer number")
