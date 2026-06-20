@@ -1,6 +1,6 @@
 {
   "name": "@elnora-ai/merit-aktiva",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Merit Aktiva accounting API for Claude Code — full CLI for the Estonian/Polish Merit Aktiva REST API, plus agents and slash commands.",
   "type": "module",
   "bin": {
