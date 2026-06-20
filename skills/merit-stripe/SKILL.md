@@ -63,9 +63,11 @@ net to the payout and are cleared by the single bank row.
 
 ## Account map (per company — set in the map, never hard-coded)
 
-Configured in `~/.config/elnora-merit/stripe-map.json` (`reconcile init` writes a placeholder).
-Confirm every code and the VAT guid against your own company (`accounts list` / `taxes list`),
-or load it from your company books reference.
+Configured in `stripe-map.json` in the references dir (`MERIT_REFERENCES_DIR`, default
+`~/.config/elnora-merit`); `reconcile init` writes a placeholder. Confirm every code and the
+VAT guid against your own company — from the **company profile** (`elnora-merit profile sync`
+→ `company-profile.json`; `profile show --section accounts|taxes`) or live
+(`accounts list` / `taxes list`).
 
 | Role | Maps to | Notes |
 |---|---|---|

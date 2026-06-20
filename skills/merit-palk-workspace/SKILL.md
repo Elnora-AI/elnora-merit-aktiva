@@ -35,8 +35,13 @@ carries the correct payroll method and the exact payload schema — then run the
 These skills are generic — the correct Merit Palk method, with **no** company account codes,
 employee data, or import IDs baked in. Real salary/withholding import IDs, GL account codes,
 department/cost-centre/project codes, and employee identifiers belong in a **company books
-reference** kept in your own private workspace (not in this public repo). When one is available,
-load it alongside the topic skill before building a payload so the right codes are used.
+reference** kept in your references dir (`MERIT_REFERENCES_DIR`, default `~/.config/elnora-merit`),
+not in this public repo. When one is available, load it alongside the topic skill before
+building a payload so the right codes are used.
+
+Note: `elnora-merit profile sync` snapshots **Aktiva** reference data only (accounts, banks,
+VAT, financial years) into `company-profile.json`. Palk import IDs are not included — keep
+those in your prose books reference.
 
 ## The rules that govern ALL Palk writes
 

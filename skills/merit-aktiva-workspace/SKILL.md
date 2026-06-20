@@ -35,6 +35,7 @@ flow to the agent). Skills carry the correct Merit method; the CLI is the mechan
 | Book Stripe payouts into Merit (writes) | Agent: `merit-bookkeeper` |
 | Multi-step record/pay/reconcile needing payload-building + confirmation | Agent: `merit-bookkeeper`; sales invoice from a description: `merit-invoice-creator` |
 | **Payroll** (employees, salaries, absences, payslips) — a different product | Skill: `merit-palk-workspace` |
+| Snapshot / look up this company's real account, bank, and VAT codes | `elnora-merit profile sync` / `profile show` (see "Company-specific books") |
 | Anything else (one-off CLI call) | Run `elnora-merit <group> <verb>` directly |
 
 Quick-lookup slash commands `/merit-invoices`, `/merit-customers`, `/merit-reports` still
@@ -42,10 +43,20 @@ work and dispatch to these skills.
 
 ## Company-specific books
 
-The how-to skills are generic — Merit's correct method, no account numbers. Real account
-codes, bank ids, VAT cadence, and local conventions belong in a **company books reference**
-kept in your own private workspace (not in this public repo). When one is available, load
-it alongside the skill before posting so the agent uses the right accounts.
+The how-to skills are generic — Merit's correct method, no account numbers. The real
+codes come from two places, both in the references directory (`MERIT_REFERENCES_DIR`,
+default `~/.config/elnora-merit`):
+
+- **`company-profile.json`** — the machine-readable codes (chart of accounts, banks, VAT
+  TaxId guids, financial years), pulled from the live account with `elnora-merit profile sync`.
+  Read it directly, or `elnora-merit profile show --section accounts|banks|taxes|years`.
+- **Prose books** (optional) — judgment the codes don't capture: which revenue account,
+  VAT/KMD cadence, standing local rules. Kept as the user's own markdown in the same
+  references dir, not in this public repo.
+
+Load whichever is available before posting so the right accounts are used. Run
+`profile sync` once (and after the chart of accounts changes); if neither exists, look
+codes up live (`accounts list`, `taxes list`) rather than guessing.
 
 ## First-run install
 

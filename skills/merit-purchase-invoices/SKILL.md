@@ -20,8 +20,9 @@ How to enter vendor bills correctly with `elnora-merit purchase-invoices`. Every
 is **POST with a JSON body**. Writes hit the live books and feed input VAT — confirm the
 payload before posting.
 
-> If your workspace provides a company books reference (expense accounts, vendor
-> conventions), load it before posting.
+> For real expense-account codes and VAT guids, load the **company profile**
+> (`elnora-merit profile sync` → `company-profile.json`); vendor conventions come from your
+> prose books reference if you keep one. Load what applies before posting.
 
 ## Decide the path first
 

@@ -11,9 +11,11 @@ build/
 .env.local
 .env.*.local
 
-# Reconcile config + ledger (populated copies live in ~/.config; never commit local ones)
+# Reconcile config + ledger + company profile (populated copies live in the
+# references dir, e.g. ~/.config/elnora-merit; never commit local ones)
 stripe-map.json
 reconcile-ledger.json
+company-profile.json
 
 # OS files
 .DS_Store

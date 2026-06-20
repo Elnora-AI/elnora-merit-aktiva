@@ -5,19 +5,19 @@
 // (written by `reconcile init`); a populated copy holds no secrets (the Stripe key
 // stays in the environment), so it can live in a private config repo.
 //
-// Resolution: --map flag › MERIT_STRIPE_MAP env › ~/.config/elnora-merit/stripe-map.json
+// Resolution: --map flag › MERIT_STRIPE_MAP env › <MERIT_REFERENCES_DIR>/stripe-map.json
+// (the base dir defaults to ~/.config/elnora-merit).
 
 import { existsSync, readFileSync } from "node:fs";
-import { homedir } from "node:os";
-import { join } from "node:path";
 import { DEFAULT_VAT_TIMEZONE } from "../reconcile/period.js";
 import type { StripeMap } from "../reconcile/types.js";
 import { ValidationError } from "../utils/errors.js";
+import { configPath } from "./config-dir.js";
 
-export const DEFAULT_MAP_PATH = join(homedir(), ".config", "elnora-merit", "stripe-map.json");
+export const DEFAULT_MAP_PATH = configPath("stripe-map.json");
 
 export function resolveMapPath(flagPath?: string, env: NodeJS.ProcessEnv = process.env): string {
-	return flagPath?.trim() || env.MERIT_STRIPE_MAP?.trim() || DEFAULT_MAP_PATH;
+	return flagPath?.trim() || env.MERIT_STRIPE_MAP?.trim() || configPath("stripe-map.json", env);
 }
 
 // `vatPayable` is intentionally NOT required: Merit posts the output VAT implicitly

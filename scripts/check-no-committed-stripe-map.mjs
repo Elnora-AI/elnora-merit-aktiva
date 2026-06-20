@@ -17,7 +17,7 @@
 import { execSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 
-const FORBIDDEN_NAMES = ["stripe-map.json", "reconcile-ledger.json"];
+const FORBIDDEN_NAMES = ["stripe-map.json", "reconcile-ledger.json", "company-profile.json"];
 
 function trackedFiles() {
 	try {
