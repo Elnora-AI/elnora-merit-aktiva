@@ -26,8 +26,10 @@ How Merit computes VAT and produces the monthly KMD, and how to support it from
 UI from the invoices you enter. The CLI's job is to get the per-line VAT right and to pull
 the figures that verify it.
 
-> If your workspace provides a company books reference (VAT rate, filing cadence, standing
-> VAT rules), load it before relying on this.
+> Get the VAT codes (TaxId guids + rates) from the **company profile**
+> (`elnora-merit profile sync` → `company-profile.json`; `profile show --section taxes`).
+> Filing cadence and standing VAT rules come from your prose books reference if you keep one.
+> Load what applies before relying on this.
 
 ## How the KMD is built (the one mental model)
 

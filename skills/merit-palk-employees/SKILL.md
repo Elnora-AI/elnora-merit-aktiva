@@ -18,8 +18,10 @@ Endpoints: `palk employees create` (sendemployees), `palk base-salary create` (s
 `palk contacts add` (sendcontacts), `palk employees list` (getemployees), `palk base-salary
 list` (getpayterms). All POST. **No API delete/update** — corrections are manual in Merit Palk.
 
-> If your workspace has a company books reference (the GL account, department/cost-centre codes,
-> salary-type import IDs actually configured in Merit Palk), load it before building a payload.
+> If your workspace keeps a company books reference (the GL account, department/cost-centre
+> codes, salary-type import IDs actually configured in Merit Palk), load it from the
+> references dir (`MERIT_REFERENCES_DIR`) before building a payload. Note: `profile sync`
+> covers Aktiva reference data only — Palk import IDs are not in `company-profile.json`.
 
 ## sendemployees vs sendpayterms — pick the right one
 

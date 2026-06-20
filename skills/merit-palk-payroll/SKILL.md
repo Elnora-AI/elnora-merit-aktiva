@@ -19,7 +19,9 @@ POST **one record per call** — loop for a whole month's run. **No API delete/u
 row is fixed manually in Merit Palk. Confirm each payload before sending.
 
 > Load the company books reference (configured salary/withholding import IDs, department codes)
-> before building rows — `Typecode` must match an import ID that already exists in Merit Palk.
+> from the references dir (`MERIT_REFERENCES_DIR`) before building rows — `Typecode` must match
+> an import ID that already exists in Merit Palk. (These Palk IDs are not in `company-profile.json`,
+> which covers Aktiva reference data only.)
 
 ## Salaries & withholdings (sendsalary)
 

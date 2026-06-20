@@ -20,8 +20,10 @@ How to issue sales invoices correctly with `elnora-merit sales-invoices`. Every
 endpoint is **POST with a JSON body**. Writes hit the live books and feed the VAT
 return — confirm the payload before posting.
 
-> If your workspace provides a company books reference (real revenue accounts, the next
-> invoice number, customer conventions), load it first before building a payload.
+> For real codes, load the **company profile** (`elnora-merit profile sync` → `company-profile.json`
+> in `MERIT_REFERENCES_DIR`): revenue accounts, VAT guids, customers. Conventions the codes
+> don't capture (the next invoice number, customer specifics) come from your prose books
+> reference if you keep one. Load what applies before building a payload.
 
 ## The four rules that prevent most mistakes
 

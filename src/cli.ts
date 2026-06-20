@@ -24,6 +24,7 @@ import { setupInventoryMovementsCommand } from "./commands/inventory-movements.j
 import { setupItemsCommand } from "./commands/items.js";
 import { setupPalkCommand } from "./commands/palk.js";
 import { setupPaymentsCommand } from "./commands/payments.js";
+import { setupProfileCommand } from "./commands/profile.js";
 import { setupProjectsCommand } from "./commands/projects.js";
 import { setupPurchaseInvoicesCommand } from "./commands/purchase-invoices.js";
 import { setupReconcileCommand } from "./commands/reconcile.js";
@@ -88,6 +89,7 @@ setupFinancialYearsCommand(program);
 setupItemsCommand(program);
 setupReportsCommand(program);
 setupReconcileCommand(program);
+setupProfileCommand(program);
 setupPalkCommand(program);
 
 try {
