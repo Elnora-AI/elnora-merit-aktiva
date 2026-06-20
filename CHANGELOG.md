@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.2](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.1...v0.1.2) (2026-06-20)
+
+
+### Features
+
+* MERIT_REFERENCES_DIR + auto-populated company profile ([#12](https://github.com/Elnora-AI/elnora-merit-aktiva/issues/12)) ([b734799](https://github.com/Elnora-AI/elnora-merit-aktiva/commit/b73479994d3abc421499ca4c6b1724ca82df0d41))
+* **reconcile:** add read-only buyer-identity resolver (äriregister + VIES) ([#9](https://github.com/Elnora-AI/elnora-merit-aktiva/issues/9)) ([f123c0b](https://github.com/Elnora-AI/elnora-merit-aktiva/commit/f123c0b4a8d58e361cda09063cb610375de91674))
+
 ## [0.1.1](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.0...v0.1.1) (2026-06-11)
 
 
