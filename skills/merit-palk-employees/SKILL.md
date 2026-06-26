@@ -59,6 +59,30 @@ elnora-merit palk employees create --data '{
   each must already exist in Merit Palk or it is ignored. (Posted-register fields: `NRStartDate`,
   `NREndDate`, `NRState` ISO2, `NRHasCert` — for the TÖR employment registration.)
 
+## Unpaid work & volunteers (TÖR type 501)
+
+Registering someone who works for the company without pay is a **töötamise register (TÖR)**
+matter, not a payroll run — there is no salary to calculate in Palk. Register it directly in
+e-MTA before the person starts.
+
+- The TÖR has a dedicated employment type **501 "Tasuta töötamine"** (unpaid work), defined by
+  EMTA as *work in the economic interests of a company or sole proprietor (FIE) without
+  remuneration* (Maksukorralduse seadus § 251(3) p1). No TSD/payroll taxes follow, because
+  nothing is paid.
+- **It must be exceptional and short.** EMTA: unpaid work in the profit-oriented sector "can
+  still be only exceptional… not realistic for anyone to work for a longer period without being
+  paid for it."
+- **You cannot disguise an employment relationship.** Töölepingu seadus § 1 defines a tööleping
+  as work done *for remuneration*; if the work is of a kind normally expected against pay, it is
+  legally presumed to be an employment contract — triggering minimum wage and social tax
+  retroactively. A "volunteer" label gives no protection if the substance is ordinary work.
+- **Genuine volunteering is different.** Public-benefit volunteer work is for non-profits and
+  foundations (which by nature have no economic interest) and is **not** registered in the TÖR
+  at all. A for-profit OÜ has no true volunteers in that sense.
+- **Consequence:** type 501 carries no social tax, therefore **no health insurance**
+  (ravikindlustus) for the person.
+- For real, ongoing work use a proper contract instead: `TypeId` 1 (employment) or 5 (services).
+
 ## Update a base salary agreement (sendpayterms)
 
 ```bash
@@ -107,6 +131,8 @@ Amount, ContractType, and GL/department codes.
   contract + agreement). Don't give a new agreement the same `StartDate` as an existing one.
 - Don't pass a `SalaryTypeImpCode` / code that isn't configured in Merit Palk — it must pre-exist.
 - Don't try to delete or edit a wrong contract via API — there is none; fix it in the Merit Palk UI.
+- Don't run unpaid help through Palk payroll or stretch TÖR type 501 to cover ongoing real work —
+  register it in the TÖR as a short exception, or use a proper contract (`TypeId` 1 or 5).
 
 ## Safety
 
