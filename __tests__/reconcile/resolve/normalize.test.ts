@@ -44,7 +44,7 @@ describe("domainToken", () => {
 		expect(domainToken("mail.sub.acme.ee")).toBe("acme");
 	});
 	it("strips punctuation and folds diacritics", () => {
-		expect(domainToken("õun.ee")).toBe("ounake");
+		expect(domainToken("õun.ee")).toBe("oun");
 	});
 });
 
