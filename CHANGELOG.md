@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.1.3](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.2...v0.1.3) (2026-07-13)
+
+
+### Features
+
+* MERIT_REFERENCES_DIR + auto-populated company profile ([#12](https://github.com/Elnora-AI/elnora-merit-aktiva/issues/12)) ([445cafc](https://github.com/Elnora-AI/elnora-merit-aktiva/commit/445cafc28620b4480c407f16bf17044eb80d5597))
+* **reconcile:** add read-only buyer-identity resolver (äriregister + VIES) ([#9](https://github.com/Elnora-AI/elnora-merit-aktiva/issues/9)) ([1b272e1](https://github.com/Elnora-AI/elnora-merit-aktiva/commit/1b272e1226ffb38b03645e947389036bf361e3c4))
+* **skills:** add merit-business-trips skill ([c86c03e](https://github.com/Elnora-AI/elnora-merit-aktiva/commit/c86c03ec657e146b198bba2853b7915cb3ac814f))
+* **skills:** add merit-business-trips skill ([d2da533](https://github.com/Elnora-AI/elnora-merit-aktiva/commit/d2da5338c8529b89aae25fa34c1a5e39712a789e))
+
+
+### Bug Fixes
+
+* close TOCTOU file races flagged by CodeQL (js/file-system-race) ([#4](https://github.com/Elnora-AI/elnora-merit-aktiva/issues/4)) ([fba6d99](https://github.com/Elnora-AI/elnora-merit-aktiva/commit/fba6d991aa26e4ded304972c81a09c386c673c99))
+
 ## [0.1.2](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.1...v0.1.2) (2026-06-20)
 
 
