@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.3](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.2...v0.1.3) (2026-07-13)
+
+
+### Features
+
+* **skills:** add merit-business-trips skill ([00d367e](https://github.com/Elnora-AI/elnora-merit-aktiva/commit/00d367e14fb70f9be56a2299094d01d2827895fe))
+* **skills:** add merit-business-trips skill ([9aeb893](https://github.com/Elnora-AI/elnora-merit-aktiva/commit/9aeb8934507b02049feca4c9282613ad181a3200))
+
 ## [0.1.2](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.1...v0.1.2) (2026-06-20)
 
 
