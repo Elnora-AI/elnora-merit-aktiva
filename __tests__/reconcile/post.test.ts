@@ -33,7 +33,7 @@ const PLAN: PayoutPlan = {
 			vatMinor: 8690,
 			vatSource: "rate",
 			created: Date.UTC(2026, 5, 12, 9, 30, 0) / 1000,
-			description: "Hackathon — Build Day",
+			description: "Workshop — Day Pass",
 		},
 	],
 	grossMinor: 44900,

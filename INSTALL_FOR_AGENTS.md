@@ -51,6 +51,13 @@ The CLI resolves credentials in this order (first wins):
 settings → "Koosta võti" (Generate key)**. This yields an **API ID** (a GUID) and an
 **API Key** (a base64 secret used as the HMAC shared key).
 
+**Offer to drive the browser.** If a Chrome DevTools MCP server (`chrome-devtools`) is
+available, offer to open Merit and walk this click-path with the user — navigating to
+**Settings → Company data → API settings** and driving the "Koosta võti" step so they can
+copy the ID and Key without hunting for the page. Keep it an offer, not a requirement:
+some users would rather click through it themselves. Either way it is the user who reads
+off and pastes the values — never generate or guess them.
+
 Write them to the per-user env file at mode `0600` (do **not** commit this anywhere):
 
 ```bash

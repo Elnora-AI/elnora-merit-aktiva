@@ -108,7 +108,7 @@ See the [official Merit reference manual](https://api.merit.ee/connecting-robots
 
 ## What you can do
 
-Full coverage of the Merit Aktiva REST API across **22 resource groups**. Run `elnora-merit <group> --help` for per-command options and payload schemas.
+Full coverage of the Merit Aktiva REST API — **22 resource groups** — plus two local helpers: `profile` (snapshot your account's codes) and `reconcile` (book Stripe payouts). Run `elnora-merit <group> --help` for per-command options and payload schemas.
 
 | Group | Commands |
 |---|---|
@@ -134,6 +134,7 @@ Full coverage of the Merit Aktiva REST API across **22 resource groups**. Run `e
 | `financial-years` | list |
 | `items` | list, list-groups, create, create-group, update |
 | `reports` | income-statement, balance-sheet, inventory, sales, purchase, customer-debts, customer-payments, more-data |
+| `profile` | sync, show — snapshot the account's chart / banks / VAT codes / financial years for lookups |
 | `reconcile` | init, preview, run, status — book Stripe payouts into Merit (see below) |
 
 ### Payroll (Merit Palk)

@@ -27,10 +27,10 @@ const TXNS: StripeBalanceTransaction[] = [
 			id: "ch_1",
 			amount: 44900,
 			currency: "eur",
-			description: "Hackathon — Build Day",
+			description: "Workshop — Day Pass",
 			receipt_email: "buyer@example.com",
 			billing_details: { name: "Jane Buyer", email: "jane@example.com" },
-			metadata: { invoice_no: "LKOZNVBY-0007" },
+			metadata: { invoice_no: "EXAMPLE1-0001" },
 		} as StripeBalanceTransaction["source"],
 	},
 	{
@@ -73,7 +73,7 @@ describe("fetchPayoutBatch", () => {
 		expect(c.netMinor).toBe(43400);
 		expect(c.buyerName).toBe("Jane Buyer");
 		expect(c.buyerEmail).toBe("jane@example.com");
-		expect(c.invoiceNoHint).toBe("LKOZNVBY-0007");
+		expect(c.invoiceNoHint).toBe("EXAMPLE1-0001");
 		expect(batch.applicationFeesMinor).toBe(2400);
 	});
 
