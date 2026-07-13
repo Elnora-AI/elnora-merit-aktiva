@@ -36,7 +36,7 @@ jobs:
       contents: read
       id-token: write # OIDC — mints the short-lived publish token; no NPM_TOKEN
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v6
         with:
