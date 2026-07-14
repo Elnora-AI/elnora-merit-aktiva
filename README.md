@@ -228,6 +228,16 @@ The plugin ships how-to skills for both products so Claude follows the correct M
 
 ---
 
+## Part of the Elnora family
+
+This tool is one of a family of universal, config-driven Claude Code tools published by [Elnora AI](https://github.com/Elnora-AI). Each works 100% standalone; install several and they chain into an end-to-end workflow — here, a full invoice-to-books loop:
+
+- **[elnora-google-workspace](https://github.com/Elnora-AI/elnora-google-workspace)** — Gmail, Drive, Docs, Sheets, and Calendar CLI + plugin. Chain: generate an invoice PDF with `elnora-merit sales-invoices get-pdf`, then email it to the customer with `gw gmail send` (or use `send-email` / `send-einvoice` directly and file the confirmation from your inbox).
+- **[knowledge-vault](https://github.com/Elnora-AI/knowledge-vault)** — a plain-Markdown Obsidian knowledge base with agent-friendly conventions. Chain: file the invoices, VAT/KMD summaries, and reconciliation reports this CLI produces into your vault's finance folders, so every booking has a paper trail your agents can search later.
+- **elnora-stripe** *(publishing soon)* — Stripe operations CLI + plugin. Chain: pull payout, fee, and refund data from Stripe, then book each payout into Merit with `elnora-merit reconcile` — one balanced GL batch per bank deposit. (The `reconcile` command already works today with any Stripe API key.)
+
+Browse the full family on the [Elnora AI org profile](https://github.com/Elnora-AI).
+
 ## Development
 
 ```bash
