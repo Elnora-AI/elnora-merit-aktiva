@@ -1,0 +1,13 @@
+# gitleaks config for elnora-merit-aktiva.
+# Extend the built-in ruleset, then allow-list the one path that legitimately
+# contains token-shaped strings: the redactSecrets() unit test ships synthetic
+# fixtures (e.g. sk_live_supersecret) whose sole purpose is to exercise the
+# secret-scrubbing logic. They are not real credentials.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "redactSecrets test fixtures are synthetic, not real credentials."
+paths = [
+  '''__tests__/output/formatter\.test\.ts''',
+]
