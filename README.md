@@ -291,13 +291,19 @@ The plugin ships how-to skills for both products so Claude follows the correct M
 
 ## Part of the Elnora family
 
-This tool is one of a family of universal, config-driven Claude Code tools published by [Elnora AI](https://github.com/Elnora-AI). Each works 100% standalone; install several and they chain into an end-to-end workflow — here, a full invoice-to-books loop:
+Open-source agent tooling from [Elnora AI](https://github.com/Elnora-AI) — free, universal, config-driven tools that wire Claude Code (or any AI coding agent) into the systems you run your company on. Each works 100% standalone; install several and they chain into end-to-end workflows.
 
-- **[elnora-google-workspace](https://github.com/Elnora-AI/elnora-google-workspace)** — Gmail, Drive, Docs, Sheets, and Calendar CLI + plugin. Chain: generate an invoice PDF with `elnora-merit sales-invoices get-pdf`, then email it to the customer with `gw gmail send` (or use `send-email` / `send-einvoice` directly and file the confirmation from your inbox).
-- **[knowledge-vault](https://github.com/Elnora-AI/knowledge-vault)** — a plain-Markdown Obsidian knowledge base with agent-friendly conventions. Chain: file the invoices, VAT/KMD summaries, and reconciliation reports this CLI produces into your vault's finance folders, so every booking has a paper trail your agents can search later.
-- **elnora-stripe** *(publishing soon)* — Stripe operations CLI + plugin. Chain: pull payout, fee, and refund data from Stripe, then book each payout into Merit with `elnora-merit reconcile` — one balanced GL batch per bank deposit. (The `reconcile` command already works today with any Stripe API key.)
-
-Browse the full family on the [Elnora AI org profile](https://github.com/Elnora-AI).
+<!-- ELNORA-FAMILY:START -->
+- [elnora-linear](https://github.com/Elnora-AI/elnora-linear) — Linear issue management — search, bulk edit, agents, and a config-driven curator
+- [elnora-slack](https://github.com/Elnora-AI/elnora-slack) — the entire Slack Web API as a CLI plus agent skills with a draft-and-approve send gate
+- [elnora-whatsapp](https://github.com/Elnora-AI/elnora-whatsapp) — read, search, and send WhatsApp from your own paired account, 100% local
+- [elnora-google-workspace](https://github.com/Elnora-AI/elnora-google-workspace) — Gmail, Calendar, Drive, Docs, Sheets, Forms, Tasks, plus any Google API via Discovery
+- [elnora-vanta](https://github.com/Elnora-AI/elnora-vanta) — read-only Vanta compliance — frameworks, tests, controls, and vulnerabilities as agent-friendly JSON
+- [elnora-luma](https://github.com/Elnora-AI/elnora-luma) — Luma (lu.ma) events — all 61 public API endpoints as a spec-driven CLI with safety guardrails
+- [elnora-travel](https://github.com/Elnora-AI/elnora-travel) — a real travel agent — live flights, hotels, Airbnb, Booking.com, and routes in one itinerary
+- [elnora-websearch-tools](https://github.com/Elnora-AI/elnora-websearch-tools) — web search — Exa, Tavily, Perplexity, Firecrawl, and Valyu CLIs and skills in one plugin
+- [knowledge-vault](https://github.com/Elnora-AI/knowledge-vault) — an Obsidian-compatible knowledge base for agent teams — search and save your work to any vault
+<!-- ELNORA-FAMILY:END -->
 
 ## Development
 
