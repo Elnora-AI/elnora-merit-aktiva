@@ -82,6 +82,7 @@
   },
   "dependencies": {
     "commander": "^15.0.0",
+    "fast-xml-parser": "^5.10.0",
     "fflate": "^0.8.3"
   }
 }
