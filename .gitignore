@@ -16,6 +16,7 @@ build/
 stripe-map.json
 reconcile-ledger.json
 company-profile.json
+docsync.json
 
 # OS files
 .DS_Store

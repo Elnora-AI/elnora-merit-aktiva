@@ -135,6 +135,33 @@ elnora-merit reconcile run --yes                # writes; idempotent via a local
 
 ---
 
+## 4b. Optional — configure document sync (missing-receipt audit)
+
+Keep every transaction backed by its source document. Read-only to start:
+
+```bash
+elnora-merit documents list-missing              # invoices with no attached receipt/invoice
+elnora-merit documents run                        # audit → search sources → match → digest (read-only)
+```
+
+Config lives in `~/.config/elnora-merit/docsync.json` (copy [`docsync.example.json`](docsync.example.json);
+gitignored, may hold a webhook URL). With no config it scans `~/Downloads`.
+
+**Recommended companion — install the [elnora-google-workspace](https://github.com/Elnora-AI/elnora-google-workspace)
+plugin.** The two connect: the bundled adapter [`adapters/gmail-drive-gw.mjs`](adapters/gmail-drive-gw.mjs)
+uses its `gw` CLI to pull receipt PDFs straight from Gmail and Drive, so most missing
+documents are found and attached automatically. After installing that plugin and running
+`gw auth`, add this source to `docsync.json`:
+
+```jsonc
+{ "type": "command", "label": "gmail-drive", "command": "node ./adapters/gmail-drive-gw.mjs" }
+```
+
+Then `documents run --apply` stages matched PDFs for a one-click Merit upload, and
+`documents install-schedule` runs it unattended. See [docs/document-sync.md](docs/document-sync.md).
+
+---
+
 ## 5. Conventions you must follow
 
 - **Output is compact JSON on stdout by default.** Parse it. `--output table` for humans,

@@ -154,7 +154,7 @@ See the [official Merit reference manual](https://api.merit.ee/connecting-robots
 
 ## What you can do
 
-Full coverage of the Merit Aktiva REST API — **22 resource groups** — plus three local helpers: `profile` (snapshot your account's codes), `reconcile` (book Stripe payouts), and `ariregister` (free Estonian Business Register lookups). Run `elnora-merit <group> --help` for per-command options and payload schemas.
+Full coverage of the Merit Aktiva REST API — **22 resource groups** — plus four local helpers: `profile` (snapshot your account's codes), `reconcile` (book Stripe payouts), `documents` (audit + attach missing receipts), and `ariregister` (free Estonian Business Register lookups). Run `elnora-merit <group> --help` for per-command options and payload schemas.
 
 | Group | Commands |
 |---|---|
@@ -182,6 +182,7 @@ Full coverage of the Merit Aktiva REST API — **22 resource groups** — plus t
 | `reports` | income-statement, balance-sheet, inventory, sales, purchase, customer-debts, customer-payments, more-data |
 | `profile` | sync, show — snapshot the account's chart / banks / VAT codes / financial years for lookups |
 | `reconcile` | init, preview, run, status — book Stripe payouts into Merit (see below) |
+| `documents` | list-missing, run, install-schedule — find transactions missing their receipt/invoice, locate the file, stage/attach it, digest to Slack (see below) |
 | `ariregister` | requisites, e-invoice-check — free live Business Register lookups (company name/VAT/address; e-invoice capability) |
 
 ### Payroll (Merit Palk)
@@ -227,6 +228,19 @@ elnora-merit reconcile status                   # booked vs outstanding
 ```
 
 Each payout becomes one balanced summary GL batch: card sales debit a clearing account, revenue is credited net of VAT (the VAT posts implicitly from the revenue line's tax tag, which auto-populates the KMD), and fees are booked as a separate expense. Your real bank-import row then clears the payout net in Merit — no double posting. The connector refuses to book a payout whose figures don't balance. See [docs/stripe-reconciliation-spec.md](docs/stripe-reconciliation-spec.md) for the full design.
+
+### Document sync — never lose a receipt
+
+Every transaction needs its source document. `documents` audits Merit for invoices with no attachment, searches the places your receipts live, stages or attaches the file, and reports the rest.
+
+```bash
+elnora-merit documents list-missing --from 2026-01-01 --to 2026-07-31   # read-only audit
+elnora-merit documents run                       # audit → search sources → match → digest (read-only)
+elnora-merit documents run --apply               # stage matched PDFs for a one-click UI upload
+elnora-merit documents install-schedule          # unattended run on an interval (macOS launchd)
+```
+
+Sources are generic: local folders, plus a `command` adapter that lets you plug in Gmail, Google Drive, or a scanner **without this package holding those credentials** (your command fetches and prints candidates as JSON). A ready-made Gmail+Drive adapter ships at [`adapters/gmail-drive-gw.mjs`](adapters/gmail-drive-gw.mjs) — we recommend installing the companion [**elnora-google-workspace**](https://github.com/Elnora-AI/elnora-google-workspace) plugin so the two connect and your receipts flow from email/Drive into Merit automatically. Merit's API can only attach a file when an invoice is *created*, so the default resolves a backlog by **staging** the matched PDF for a two-second UI upload (`--rebook` delete+recreates in place). The digest posts to a Slack-compatible webhook (`MERIT_DOCSYNC_WEBHOOK`). See [docs/document-sync.md](docs/document-sync.md).
 
 ---
 
