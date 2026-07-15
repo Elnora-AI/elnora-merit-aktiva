@@ -12,6 +12,7 @@ import { fileURLToPath } from "node:url";
 import { Command } from "commander";
 import { loadEnvFile } from "./client/auth.js";
 import { setupAccountsCommand } from "./commands/accounts.js";
+import { setupAriregisterCommand } from "./commands/ariregister.js";
 import { setupBanksCommand } from "./commands/banks.js";
 import { setupCostCentersCommand } from "./commands/cost-centers.js";
 import { setupCustomersCommand } from "./commands/customers.js";
@@ -89,6 +90,7 @@ setupFinancialYearsCommand(program);
 setupItemsCommand(program);
 setupReportsCommand(program);
 setupReconcileCommand(program);
+setupAriregisterCommand(program);
 setupProfileCommand(program);
 setupPalkCommand(program);
 

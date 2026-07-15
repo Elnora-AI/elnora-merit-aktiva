@@ -30,7 +30,12 @@ to live books and affects VAT reporting, so the flow always ends with explicit u
 2. **Resolve the customer.** Search first: `elnora-merit customers list --name "<name>"`
    (or `--reg-no`). If found, use `{ "Customer": { "Id": "<guid>" } }`. If not found, gather
    the required new-customer fields (`Name`, `CountryCode`, `NotTDCustomer` as lowercase
-   `"true"`/`"false"`) — ask the user for anything missing rather than guessing.
+   `"true"`/`"false"`) — ask the user for anything missing rather than guessing. For an
+   Estonian company you have a registry code for, pull authoritative details for free with
+   `elnora-merit ariregister requisites <regCode>` (legal name, VAT number, address) instead
+   of asking — see the `merit-company-lookup` skill. Before choosing e-invoice delivery you
+   can confirm the customer can receive one: `elnora-merit ariregister e-invoice-check <regCode>`
+   (status `OK` = yes).
 3. **Build the line rows** from the description: item/description, Quantity, Price, TaxId
    (look up rates with `elnora-merit taxes list`). Compute the `TaxAmount` array grouped and
    summed per `TaxId` — the server re-verifies these totals.
