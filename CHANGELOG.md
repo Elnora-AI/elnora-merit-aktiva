@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.5](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.4...v0.1.5) (2026-07-15)
+
+
+### Bug Fixes
+
+* **documents:** scan image receipts in dir sources ([#34](https://github.com/Elnora-AI/elnora-merit-aktiva/issues/34)) ([e555020](https://github.com/Elnora-AI/elnora-merit-aktiva/commit/e555020b5964a62364816af11c42924527f64fc7))
+
 ## [0.1.4](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.3...v0.1.4) (2026-07-15)
 
 
