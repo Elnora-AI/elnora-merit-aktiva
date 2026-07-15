@@ -1,0 +1,21 @@
+{
+  "_comment": "Copy to ~/.config/elnora-merit/docsync.json (gitignored) and edit. Every field is optional; with no config the tool scans ~/Downloads. Full guide: docs/document-sync.md.",
+  "_sources": "A `dir` source scans a local folder for PDFs. A `command` source runs a shell command that fetches from Gmail/Drive/a scanner/etc. WITH YOUR OWN AUTH (outside this repo), writes each file locally, and prints one JSON object per line: {\"path\":\"/abs/file.pdf\",\"text\":\"Acme Taxi 42.50 2026-03-15\",\"amounts\":[42.50],\"dates\":[\"2026-03-15\"]}",
+  "_gmail_drive": "The bundled adapter at adapters/gmail-drive-gw.mjs pulls receipts straight from Gmail + Drive using the elnora-google-workspace `gw` CLI (install that plugin and run `gw auth` once). Adjust the search via env: DOCSYNC_GMAIL_QUERY, DOCSYNC_DRIVE_FOLDER. Replace the path below with your checkout.",
+  "sources": [
+    { "type": "dir", "path": "~/Downloads" },
+    { "type": "dir", "path": "~/Documents/receipts", "recursive": true },
+    { "type": "command", "label": "gmail-drive", "command": "node ./adapters/gmail-drive-gw.mjs" }
+  ],
+
+  "acceptThreshold": 0.9,
+  "reviewThreshold": 0.6,
+  "amountTolerance": 0.02,
+  "dateWindowDays": 5,
+
+  "_webhookUrl": "Slack-compatible incoming webhook for the digest. Prefer the MERIT_DOCSYNC_WEBHOOK env var over storing the secret here. Delete this key (or leave it empty) if you use notifyCommand or --quiet.",
+  "webhookUrl": "",
+
+  "_notifyCommand": "Alternative to webhookUrl: a shell command that receives the digest text on stdin. Leave empty to disable.",
+  "notifyCommand": ""
+}
