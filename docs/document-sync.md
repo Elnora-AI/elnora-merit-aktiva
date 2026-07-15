@@ -30,8 +30,9 @@ elnora-merit documents install-schedule
 
 ## How matching works
 
-Each configured source yields candidate PDFs. Every candidate is scored against
-every missing invoice on three independent signals:
+Each configured source yields candidate documents (PDFs and image receipts —
+`.jpg`, `.png`, `.heic`, `.webp`, …). Every candidate is scored against every
+missing invoice on three independent signals:
 
 | Signal | Weight | Matches when |
 |---|---|---|
@@ -141,7 +142,7 @@ optional; with no config at all the tool scans `~/Downloads`.
 
 | Field | Default | Meaning |
 |---|---|---|
-| `sources` | `[{dir: ~/Downloads}]` | where to look for candidate PDFs |
+| `sources` | `[{dir: ~/Downloads}]` | where to look for candidate documents (PDFs + image receipts) |
 | `acceptThreshold` | 0.9 | auto-resolve at/above this score |
 | `reviewThreshold` | 0.6 | report as a suggestion at/above this score |
 | `amountTolerance` | 0.02 | currency-unit slack for an amount match |

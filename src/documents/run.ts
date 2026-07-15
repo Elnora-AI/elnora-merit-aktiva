@@ -5,6 +5,7 @@
 // invoice with the file. Everything the run touched is returned as a RunSummary
 // for the digest.
 
+import { extname } from "node:path";
 import type { MeritClient } from "../client/merit-client.js";
 import { readPdfBase64, rebookPurchaseInvoiceWithAttachment, stageForUpload } from "./attach.js";
 import { auditPurchaseInvoices, auditSalesInvoices } from "./audit.js";
@@ -56,7 +57,14 @@ export async function runDocSync(client: MeritClient, opts: RunOptions): Promise
 			summary.review.push(match);
 			continue;
 		}
-		if (opts.rebook && match.missing.kind === "purchase-invoice") {
+		// Rebook attaches at invoice creation, which Merit accepts only as a PDF.
+		// A photo receipt (.jpg/.png/…) can't be rebooked — stage it instead of
+		// letting readPdfBase64 abort the whole run.
+		const canRebook =
+			opts.rebook &&
+			match.missing.kind === "purchase-invoice" &&
+			extname(match.best.candidate.path).toLowerCase() === ".pdf";
+		if (canRebook) {
 			const pdf = readPdfBase64(match.best.candidate.path);
 			const { newId } = await rebookPurchaseInvoiceWithAttachment(client, match.missing, pdf, { force: opts.force });
 			summary.attached.push({
