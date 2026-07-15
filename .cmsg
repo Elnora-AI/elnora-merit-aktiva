@@ -1,0 +1,7 @@
+ci: add release-dispatch workflow
+
+On push to main, trigger the org's centralized release automation for
+this repo so a release is cut automatically when a release PR is merged.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WUhYjxo3aEXF4RZE1oRmtL
