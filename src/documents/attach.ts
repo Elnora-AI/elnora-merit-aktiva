@@ -15,7 +15,7 @@
 //     default. Reconstruction is faithful only for simple single-currency invoices.
 
 import { copyFileSync, mkdirSync, readFileSync } from "node:fs";
-import { basename, join } from "node:path";
+import { basename, extname, join } from "node:path";
 import type { MeritClient } from "../client/merit-client.js";
 import { ValidationError } from "../utils/errors.js";
 import type { MissingDoc } from "./types.js";
@@ -30,11 +30,13 @@ export function readPdfBase64(path: string): { fileName: string; base64: string 
 }
 
 /** Safe path: copy the matched file into a staging folder for a manual UI upload. */
-export function stageForUpload(missing: MissingDoc, pdfPath: string, outDir: string): string {
+export function stageForUpload(missing: MissingDoc, docPath: string, outDir: string): string {
 	mkdirSync(outDir, { recursive: true });
 	const safeBill = (missing.billNo ?? missing.id).replace(/[^\w.-]+/g, "_");
-	const dest = join(outDir, `${safeBill}__${missing.id.slice(0, 8)}.pdf`);
-	copyFileSync(pdfPath, dest);
+	// Keep the source extension — a receipt may be a PDF or a phone photo (.jpg/.png/…).
+	const ext = extname(docPath).toLowerCase() || ".pdf";
+	const dest = join(outDir, `${safeBill}__${missing.id.slice(0, 8)}${ext}`);
+	copyFileSync(docPath, dest);
 	return dest;
 }
 

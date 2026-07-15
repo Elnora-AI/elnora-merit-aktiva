@@ -55,7 +55,7 @@ Best practice: attach the receipt in the same `purchase-invoices create` call fo
 ## Sources (local + Gmail/Drive/anything)
 
 Configure in `~/.config/elnora-merit/docsync.json` (see `docsync.example.json`):
-- `{ "type": "dir", "path": "~/Downloads" }` — scan a local folder.
+- `{ "type": "dir", "path": "~/Downloads" }` — scan a local folder for PDFs and image receipts (`.jpg`/`.png`/`.heic`/`.webp`/…).
 - `{ "type": "command", "command": "…" }` — run your own fetcher for Gmail/Drive/scanner;
   it writes files locally and prints one JSON line per candidate
   (`{"path":"…","amounts":[…],"dates":[…],"text":"…"}`). No provider SDK or secret lives

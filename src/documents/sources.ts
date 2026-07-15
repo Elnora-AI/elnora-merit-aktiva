@@ -2,7 +2,7 @@
 //
 // Two source types, both generic — no provider SDKs, no baked-in credentials:
 //
-//   { type: "dir",     path }      Scan a local directory for PDFs (built-in).
+//   { type: "dir",     path }      Scan a local directory for receipts (built-in).
 //   { type: "command", command }   Run a shell command that prints candidates.
 //
 // The `command` adapter is how you wire Gmail, Google Drive, a scanner inbox, or
@@ -20,6 +20,26 @@ import { promisify } from "node:util";
 import type { Candidate, SourceConfig } from "./types.js";
 
 const execFileAsync = promisify(execFile);
+
+/**
+ * File types a `dir` source treats as a candidate document. Receipts arrive as
+ * PDFs and, just as often, as phone photos — scan both so a snapshot of a paper
+ * receipt is not silently skipped. The filename still drives matching (amount /
+ * date / party), so a descriptive name like `2026-07-09-khanittha-49.70-eur.jpg`
+ * resolves the same way a PDF would.
+ */
+const DOC_CONTENT_TYPES: Record<string, string> = {
+	".pdf": "application/pdf",
+	".jpg": "image/jpeg",
+	".jpeg": "image/jpeg",
+	".png": "image/png",
+	".heic": "image/heic",
+	".heif": "image/heif",
+	".webp": "image/webp",
+	".gif": "image/gif",
+	".tif": "image/tiff",
+	".tiff": "image/tiff",
+};
 
 /** Expand a leading ~ to the home directory. */
 function expandHome(p: string): string {
@@ -45,13 +65,17 @@ function scanDir(dir: string, recursive: boolean, out: Candidate[], depth = 0): 
 		}
 		if (st.isDirectory()) {
 			if (recursive) scanDir(full, recursive, out, depth + 1);
-		} else if (extname(name).toLowerCase() === ".pdf") {
+			continue;
+		}
+		const ext = extname(name).toLowerCase();
+		const contentType = DOC_CONTENT_TYPES[ext];
+		if (contentType) {
 			out.push({
 				path: full,
 				fileName: name,
-				contentType: "application/pdf",
+				contentType,
 				source: `dir:${dir}`,
-				hints: { text: basename(name, extname(name)) },
+				hints: { text: basename(name, ext) },
 			});
 		}
 	}
