@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.4](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.3...v0.1.4) (2026-07-15)
+
+
+### Features
+
+* **ariregister:** add free Business Register live lookups ([#29](https://github.com/Elnora-AI/elnora-merit-aktiva/issues/29)) ([23a6c40](https://github.com/Elnora-AI/elnora-merit-aktiva/commit/23a6c401018e2ff9fad6c6aabc14a1f6263d3dd1))
+* **documents:** add document-sync — audit + attach missing receipts ([#32](https://github.com/Elnora-AI/elnora-merit-aktiva/issues/32)) ([485513c](https://github.com/Elnora-AI/elnora-merit-aktiva/commit/485513c975e13d2c2b1b844f22fa9c60d060e711))
+
 ## [0.1.3](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.2...v0.1.3) (2026-07-13)
 
 
