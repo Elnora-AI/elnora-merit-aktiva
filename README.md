@@ -79,6 +79,52 @@ elnora-merit profile show --section taxes  # the VAT TaxId guids, etc.
 `company-profile.json` holds no secrets but is company-specific, so it is gitignored.
 Re-run `profile sync` whenever the chart of accounts changes.
 
+### Estonian Business Register lookups (optional)
+
+**This step is entirely optional.** Everything else in the CLI and the Merit agent works
+without it. Setting it up just adds one extra capability: the `elnora-merit ariregister`
+commands, which pull company data straight from the Estonian Business Register (äriregister)
+using RIK's **free** ("tasuta") API services — so an agent can fill a new customer's legal
+name, VAT number, and address, and check e-invoice capability, from the authoritative source
+instead of asking you.
+
+One of the two lookups needs no setup at all:
+
+```bash
+# e-invoice capability — works with NO credentials:
+elnora-merit ariregister e-invoice-check 16818352
+```
+
+The requisite lookup needs a free äriregister contract + login. To enable it:
+
+1. **Register for the free API tier.** Go to [rik.ee → e-äriregister → XML teenus](https://www.rik.ee/et/e-ariregister/xml-teenus)
+   and conclude a contract for the **"Ainult e-äriregistri tasuta API-teenused"** (free API
+   services only) tier at the [e-äriregister portal](https://ariregister.rik.ee/). You log in
+   with an Estonian ID-card / Mobiil-ID / Smart-ID. The free tier has no per-query cost. See
+   RIK's [contractual-client admin guide](https://abiinfo.rik.ee/e-ariregistri-paringud/juhised-lepingulise-kliendi-administraatorkasutajale).
+2. **Create an XML-authorised user.** In the portal: **Haldus → Kasutajate haldamine → Lisa
+   kasutaja**, and enable XML/API access for it. (Optionally set the credit limit to `0` so
+   only free services can ever run.)
+3. **Get the username + password.** The username is shown in the users table; generate the
+   password with the **"Uus parool"** button (note: this XML-service password is separate from
+   your portal login, and a freshly generated one can take ~10 minutes to activate).
+4. **Save them to `~/.config/elnora-merit/.env`** (mode `0600`, gitignored — never commit):
+
+   ```bash
+   ARIREG_XML_USER=YOURUSERNAME
+   ARIREG_XML_PASSWORD=your-xml-service-password
+   ```
+
+Then both lookups work:
+
+```bash
+elnora-merit ariregister requisites 16818352      # → name, VAT, status, address
+elnora-merit ariregister e-invoice-check 16818352 # → OK/MR + e-invoice operator
+```
+
+Only the free services are exposed; billable queries (detailed data, beneficial owners,
+representation rights) are intentionally excluded. See the `merit-company-lookup` skill/agent.
+
 ---
 
 ## Quickstart
