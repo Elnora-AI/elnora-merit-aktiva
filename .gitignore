@@ -35,3 +35,6 @@ coverage/
 # Scratch / harvested docs
 .firecrawl/
 .docs-cache/
+# Local API dumps — real company books (balance sheets, GL exports, invoice data).
+# This repo is public; these must never be committed.
+scratch/

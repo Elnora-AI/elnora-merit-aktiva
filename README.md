@@ -284,7 +284,7 @@ The plugin ships how-to skills for both products so Claude follows the correct M
 - **Dates:** query fields use `YYYYMMDD` (the CLI also accepts `YYYY-MM-DD` and normalizes). Some payload fields use `YYYYMMDDHHMMSS` — see each command's help.
 - **Period limits:** invoice list queries span at most 3 months.
 - **Batch limit:** at most 500 rows per document.
-- **Sales invoices cannot be updated** — delete and re-create. Merit does not issue invoice numbers; manage your own.
+- **Sales invoices cannot be updated via the API** — there is no update endpoint, so the API route is delete and re-create. The Merit UI edits an invoice in place, which is usually the better fix for a single wrong field. A **paid** invoice is locked in both: remove the payment first. Merit does not issue invoice numbers; manage your own.
 - **Rate limit:** 100 requests/minute. The CLI auto-retries HTTP 429 honouring `Retry-After`.
 
 ---
