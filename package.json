@@ -13,6 +13,7 @@
     "commands/",
     "skills/",
     ".claude-plugin/",
+    ".mcp.json",
     "AGENTS.md",
     "INSTALL_FOR_AGENTS.md",
     "README.md",

@@ -1,7 +1,7 @@
 {
   "name": "merit-aktiva-workspace",
   "version": "0.1.5",
-  "description": "Merit Aktiva accounting + Merit Palk payroll for Claude Code — full API coverage via the elnora-merit CLI, plus how-to skills for the correct Merit procedure: accounting (sales/purchase invoices, payments/bank reconciliation, VAT/KMD, reports, reverse charge) and payroll (employees & contracts, monthly salaries/withholdings/absences, salary & GL reports, per-employee settings), agents, and slash commands.",
+  "description": "Merit Aktiva accounting + Merit Palk payroll for Claude Code — full API coverage via the elnora-merit CLI, plus how-to skills for the correct Merit procedure: accounting (sales/purchase invoices, payments/bank reconciliation, VAT/KMD, reports, reverse charge) and payroll (employees & contracts, monthly salaries/withholdings/absences, salary & GL reports, per-employee settings), agents, and slash commands. Bundles LHV's official read-only bank MCP server, so an LHV statement imports straight into Merit with no file export.",
   "author": {
     "name": "Elnora AI",
     "email": "opensource@elnora.ai",
@@ -17,6 +17,8 @@
     "payroll",
     "estonia",
     "invoicing",
-    "e-invoice"
+    "e-invoice",
+    "lhv",
+    "banking"
   ]
 }
