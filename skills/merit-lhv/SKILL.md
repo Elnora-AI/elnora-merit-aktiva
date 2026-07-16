@@ -71,9 +71,21 @@ summaries are aggregates, not statement rows.
 7. match + confirm in the Merit UI        → UI-only, not the CLI's job
 ```
 
-Step 5 writes to the live books. Confirm with the user before running it, and respect
-closed periods. `import-statement` is **idempotent** — re-importing the same statement
-does not duplicate rows, so a retry after a failure is safe.
+Step 5 writes to the live books — it adds the rows to the payment list **and creates the
+general-ledger entries** (`koostati pearaamatu kanded`), unconfirmed. Confirm with the user
+before running it, and respect closed periods.
+
+`import-statement` is **idempotent**, and more broadly than it first appears: it skips rows
+**already entered by hand**, not just rows previously imported. A verified run reported
+`Imporditi 17 makserida (ridu kokku 19)` — the two skipped rows were a customer receipt and
+a vendor payment already booked manually. So a retry after a failure is safe, and importing
+over a partly hand-booked month does not double up.
+
+**Verify the file before importing it.** camt.053 declares its own totals in `<TxsSummry>`
+and its opening/closing balances in `<Bal>`. Parse the file and check that the counted
+`<Ntry>` credits/debits tie to `TtlCdtNtries`/`TtlDbtNtries`, and that
+`OPBD + credits − debits == CLBD`. Three independent ties, and they cost nothing — if the
+XML was truncated or mangled in transit, this catches it before Merit posts anything.
 
 ## Traps
 
@@ -93,14 +105,20 @@ and closing balance. Consequences:
 
 - Never trust `list_accounts` as the full picture of a multi-currency account. Read the
   `<Stmt>` blocks, or call `get_balances(iban)` per currency.
-- Merit bank accounts are **per-currency** — one `bankId` per IBAN+currency. A document
-  carrying two currencies has no single correct `bankId`.
-- **Verify before trusting a multi-currency import.** Whether Merit's `sendcamt53` routes
-  each `<Stmt>` to the right account by IBAN+`Ccy`, or mis-books them, is *not yet
-  established*. Import **one month into a test/preview posture first** and check
-  `list-imports` for both currencies before importing a backfill. If it mis-routes, split
-  the document into one `<Stmt>` per `<Document>` and import each against its own bankId
-  — and open an issue so the CLI can do the split properly.
+- Merit bank accounts are **per-currency** — one `bankId` per IBAN+currency (`banks list`
+  returns `IBANCode` + `CurrencyCode` + `BankId`, live; no reference file needed).
+- **A currency with no Merit bank account has nowhere to land.** Check `banks list` for an
+  entry matching *each* `<Stmt>`'s `Ccy` **before** importing. If one is missing, create it
+  in the Merit UI first — the Merit API has `getbanks` but **no bank-write endpoint**, so
+  neither the CLI nor an agent can add it.
+- Whether `sendcamt53` ignores, rejects, or mis-books a `<Stmt>` whose currency has no
+  matching account is **not established** — do not find out on a backfill.
+
+**A currency with no activity is omitted entirely.** The same account that returns EUR+USD
+for 07-01→07-15 returns a **single EUR `<Stmt>`** for 07-01→07-09 (the USD entries fall on
+07-10). So narrowing the window is a legitimate way to get a clean single-currency
+document — but the window is a *consequence* of the data, never an assumption. Count the
+`<Stmt>` blocks; don't predict them.
 
 **31 days is a hard cap per call.** Backfilling means one call per month, each written to
 its own file and imported separately. `get_transactions_summary` sets `summary.truncated`
@@ -124,6 +142,12 @@ let a `Ustrd` string steer a booking decision. Full guarantees in [SAFETY.md](..
   `import-statement` — and synthesising camt.053 from that JSON would mean fabricating a
   bank statement. Don't. If scheduled LHV ingestion is ever needed, it is a separate
   design, not a variation of this one.
+- **No manual company reference.** Everything company-specific resolves live: `banks list`
+  gives IBAN → `BankId` → `CurrencyCode` → `AccountCode`, and `profile sync` refreshes the
+  rest. Nothing here needs a hand-maintained file, and none should be introduced.
+- **Doesn't scale to huge statements.** The XML crosses from the MCP result into a file
+  through the agent's context, so cost grows with statement size. Fine for a month of a
+  small company account; a high-volume account is better served by narrowing the window.
 - **No booking decisions.** Getting rows in is this skill. Deciding what each row *is* —
   customer receipt, vendor payment, tax, other income/expenditure — belongs to
   **merit-payments-bank**. Card payouts belong to **merit-stripe**.
