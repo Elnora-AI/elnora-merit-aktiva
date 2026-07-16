@@ -80,15 +80,16 @@ function parseEnvFile(path: string): Record<string, string> {
 // Keys never honored from the cwd `.env`: a cloned repository could ship a `.env`
 // that redirects fully signed requests to an attacker-controlled host (the HMAC key
 // itself never leaves the machine, but a signed request can be replayed against the
-// real API within the timestamp window). Base-URL overrides are only honored from
-// the real environment or the home env file.
-const CWD_DENYLIST = new Set(["MERIT_BASE_URL", "MERIT_PALK_BASE_URL"]);
+// real API within the timestamp window). The same applies to the docsync webhook,
+// which receives a digest of accounting data and local file names. Destination
+// overrides are only honored from the real environment or the home env file.
+const CWD_DENYLIST = new Set(["MERIT_BASE_URL", "MERIT_PALK_BASE_URL", "MERIT_DOCSYNC_WEBHOOK"]);
 
 /**
  * Hydrate process.env from the home and cwd env files without overwriting any
  * variable that is already set. Home file wins over the cwd file, and untrusted
- * paths (by default the cwd `.env`) may not set base-URL overrides (see
- * CWD_DENYLIST). Safe to call multiple times. Call once at CLI startup.
+ * paths (by default the cwd `.env`) may not set request-destination overrides
+ * (see CWD_DENYLIST). Safe to call multiple times. Call once at CLI startup.
  */
 export function loadEnvFile(paths: string[] = defaultEnvPaths(), untrustedPaths: string[] = [CWD_ENV_FILE]): void {
 	const untrusted = new Set(untrustedPaths);

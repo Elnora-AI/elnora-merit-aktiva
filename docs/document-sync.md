@@ -115,6 +115,11 @@ The run produces a digest and delivers it to whichever you configure:
 - `notifyCommand` — a shell command that receives the digest text on stdin.
 - neither — the digest is printed (also available in the JSON output as `digest`).
 
+The digest carries vendor names, invoice numbers, amounts and local file names, so
+the webhook is a data destination. `MERIT_DOCSYNC_WEBHOOK` is therefore only honored
+from the real environment or the home env file — never from a `.env` in the current
+directory, which a cloned repo could ship.
+
 ## Scheduling
 
 `documents install-schedule` sets up an unattended run. On macOS it installs a
