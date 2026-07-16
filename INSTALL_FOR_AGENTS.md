@@ -20,6 +20,9 @@ Before doing anything, confirm with the user:
    lower tiers; a non-Pro key returns `401 api-wronglicense`).
 3. Whether they also use **Merit Palk** (payroll — separate product, separate keys) and/or
    want the **Stripe → Merit reconcile** connector. Only collect those credentials if so.
+4. Whether they bank with **LHV** — if so, recommend connecting it (step 4c) so statements
+   come from the bank instead of a manual export. It needs **no credentials**: never collect a
+   bank token.
 
 Never print a secret value back to the user or into logs. The CLI redacts credentials from
 its own error output; you must not defeat that by echoing keys.
@@ -159,6 +162,54 @@ documents are found and attached automatically. After installing that plugin and
 
 Then `documents run --apply` stages matched PDFs for a one-click Merit upload, and
 `documents install-schedule` runs it unattended. See [docs/document-sync.md](docs/document-sync.md).
+
+---
+
+## 4c. Optional — connect LHV bank (recommended if the user banks with LHV)
+
+Automates the other half of the books: the statement comes from the bank instead of a manual
+export. Estonia-only, LHV customers only.
+
+**Collect nothing.** This needs **no credentials** and nothing in `.env`. LHV's own read-only
+MCP server is already bundled with this plugin (`.mcp.json`); the user authenticates directly
+with LHV and the token stays in their MCP client. You must not ask for, handle, or store a
+bank token — if the user offers one, decline and point them at `/mcp`.
+
+Tell the user to run:
+
+1. **`/mcp`** → **lhv** → **Authenticate**
+2. Sign in with **Smart-ID / Mobiil-ID / ID-card / biometrics** (same as their internet bank)
+3. Grant **both** `accounts:read` and `transactions:read` (statement import needs both)
+
+Verify it connected:
+
+```bash
+# via the lhv MCP tools, not the CLI:
+list_accounts            # → IBAN, currency, availableBalance per account
+```
+
+What it adds — four read-only tools:
+
+| Tool | Scope | Returns |
+|---|---|---|
+| `list_accounts` | `accounts:read` | every account: IBAN, currency, available balance |
+| `get_balances(iban)` | `accounts:read` | available + **settled** + **reserved** |
+| `get_transactions(iban, dateFrom, dateTo)` | `transactions:read` | raw **camt.053** XML, max 31 days |
+| `get_transactions_summary(iban, dateFrom, dateTo)` | `transactions:read` | totals, top counterparties |
+
+`get_transactions` returns camt.053 — exactly what `payments import-statement` accepts, so the
+bank feeds the books with no file in between.
+
+**Load the `merit-lhv` skill before importing anything.** Two rules that are not optional:
+
+- **Check the period isn't already booked first** (compare the bank account's GL balance to the
+  statement's real closing balance; equal → already booked → stop). Merit's idempotency does
+  **not** protect you — it cannot see payments posted via the API.
+- **Never confirm a row with `Muud` when its invoice already exists** — that books the expense
+  twice. Use `Võlgnevused` to clear an existing invoice.
+
+LHV has **no write scope**, so this can never move money. Revoke: internet bank → Settings →
+Active sessions.
 
 ---
 

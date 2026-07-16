@@ -125,6 +125,43 @@ elnora-merit ariregister e-invoice-check 16818352 # → OK/MR + e-invoice operat
 Only the free services are exposed; billable queries (detailed data, beneficial owners,
 representation rights) are intentionally excluded. See the `merit-company-lookup` skill/agent.
 
+### LHV bank connection (optional — recommended if you bank with LHV)
+
+**Optional. Everything else works without it.** Connecting it automates the other half of the
+books: instead of exporting a statement file from your internet bank and uploading it, your
+agent pulls the statement from LHV directly and imports it into Merit.
+
+[LHV](https://lhv.ai/) (AS LHV Pank) publishes its own **read-only** MCP server, and this
+plugin already bundles it — there is nothing to install and **no key to add**. Just connect it:
+
+1. Run **`/mcp`**, pick **lhv**, choose **Authenticate**.
+2. Sign in exactly as you would in your internet bank — **Smart-ID, Mobiil-ID, ID-card, or
+   biometrics**.
+3. On LHV's consent screen pick the scopes. Statement import needs **both** `accounts:read`
+   and `transactions:read`.
+
+The token lives in your own MCP client for 30 days. **This plugin never sees or stores it**,
+and LHV exposes **no write scope at all** — an assistant can read your accounts and can never
+move money. Revoke any time: internet bank → **Settings → Active sessions**.
+
+**What the connection gives you:**
+
+| Ask your agent | What it uses |
+|---|---|
+| "What's our balance?" | every account — IBAN, currency, available balance |
+| "How much is actually available vs reserved?" | available, **settled**, and **reserved** balance per IBAN |
+| "What did we spend on X last month?" | totals, top counterparties, income vs spend (max 31 days) |
+| "Show me last week's transactions" | the full statement — what came in, what went out |
+| **"Import July's statement into Merit"** | the statement as **camt.053**, straight into `payments import-statement` — no file export |
+
+The last one is the point: LHV returns a real ISO 20022 **camt.053** statement, which is
+exactly what Merit's bank import accepts, so the bank and the books talk to each other with no
+file in between. The **`merit-lhv`** skill drives it — and its first step is checking whether
+the period is *already booked*, because importing an already-booked month double-books it.
+
+Estonia-only, and only for LHV customers. Other banks: export camt.053 from your internet bank
+and use `payments import-statement --file` as usual.
+
 ---
 
 ## Quickstart
@@ -228,6 +265,26 @@ elnora-merit reconcile status                   # booked vs outstanding
 ```
 
 Each payout becomes one balanced summary GL batch: card sales debit a clearing account, revenue is credited net of VAT (the VAT posts implicitly from the revenue line's tax tag, which auto-populates the KMD), and fees are booked as a separate expense. Your real bank-import row then clears the payout net in Merit — no double posting. The connector refuses to book a payout whose figures don't balance. See [docs/stripe-reconciliation-spec.md](docs/stripe-reconciliation-spec.md) for the full design.
+
+### Import an LHV bank statement — no file export
+
+If you bank with LHV and connected it above (`/mcp` → lhv), the statement comes straight from
+the bank as **camt.053** — the format Merit's import already accepts.
+
+```bash
+elnora-merit banks list                                  # bankId + IBAN + currency (live, no config file)
+elnora-merit reports balance-sheet --end-date 20260731   # STEP 0: already booked? then stop
+elnora-merit payments import-statement --file statement.xml
+elnora-merit payments list-imports <bankId> --booking-date-from 2026-07-01
+```
+
+**Check the period isn't already booked before importing.** If the bank account's GL balance
+already equals the bank's real closing balance, the month is booked and there is nothing to
+import — the usual case. Merit's own idempotency will not catch this for you: it cannot see
+payments posted through the API. Then match rows in the Merit UI, where **Võlgnevused** clears
+an invoice that already exists and **Muud** creates a *new* expense — picking `Muud` for an
+already-invoiced payment books it twice. The **`merit-lhv`** and **`merit-payments-bank`**
+skills carry the full procedure and the traps.
 
 ### Document sync — never lose a receipt
 
