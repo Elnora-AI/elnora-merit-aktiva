@@ -40,6 +40,7 @@
     "format": "biome format --write src/ __tests__/",
     "typecheck": "tsc --noEmit",
     "check:config": "node scripts/check-no-committed-stripe-map.mjs",
+    "check:books": "node scripts/check-no-committed-books.mjs",
     "prepack": "pnpm build",
     "prepublishOnly": "pnpm typecheck && pnpm lint && pnpm test"
   },
