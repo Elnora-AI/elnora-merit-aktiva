@@ -7,7 +7,7 @@ export function setupSalesInvoicesCommand(program: Command): void {
 	const grp = program
 		.command("sales-invoices")
 		.description(
-			"Sales invoices (Merit Aktiva). All endpoints are POST with a JSON body. You CANNOT update an invoice — delete and re-create. There is no get-next-invoice-number endpoint; manage your own InvoiceNo and remember the last number.",
+			"Sales invoices (Merit Aktiva). All endpoints are POST with a JSON body. The API has no update endpoint — to change an invoice via the API you delete and re-create it. The Merit UI CAN edit an invoice in place (keeping its number, dates and payment), so for a field-level fix route the user there rather than deleting. A PAID invoice is locked: delete fails ('Tasutud arvet ei saa kustutada. Enne kustutage makse.') and the UI refuses to change the customer/currency — remove the payment first. There is no get-next-invoice-number endpoint; manage your own InvoiceNo and remember the last number.",
 		);
 
 	// QUERY: list invoices over a period (v1). Period span max 3 months.
@@ -256,11 +256,11 @@ export function setupSalesInvoicesCommand(program: Command): void {
 			}),
 		);
 
-	// DESTRUCTIVE: delete an invoice (v1). No update endpoint exists — delete + re-create.
+	// DESTRUCTIVE: delete an invoice (v1). Fails on a paid invoice — the payment must go first.
 	grp
 		.command("delete <id>")
 		.description(
-			"Delete a sales invoice by id (SIHId). Endpoint: POST /api/v1/deleteinvoice. There is no update endpoint — to change an invoice, delete it and create a new one.",
+			"Delete a sales invoice by id (SIHId). Endpoint: POST /api/v1/deleteinvoice. The API has no update endpoint, so changing an invoice via the API means delete + re-create — but the Merit UI edits in place, which is usually the better fix for one wrong field. FAILS with 400 on a PAID invoice ('Tasutud arvet ei saa kustutada. Enne kustutage makse.'): delete the payment first.",
 		)
 		.option("--yes", "Confirm the deletion")
 		.action(

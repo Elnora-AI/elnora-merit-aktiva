@@ -25,7 +25,7 @@ return — confirm the payload before posting.
 > don't capture (the next invoice number, customer specifics) come from your prose books
 > reference if you keep one. Load what applies before building a payload.
 
-## The four rules that prevent most mistakes
+## The five rules that prevent most mistakes
 
 1. **You manage the invoice number.** Merit issues none and there is no
    get-next-number endpoint. `InvoiceNo` is required and must be unique; read your last
@@ -35,10 +35,20 @@ return — confirm the payload before posting.
    `elnora-merit taxes list` (each row: `Id`, `Code` like `24%`, `TaxPct`). Put that
    `TaxId` on every `InvoiceRow`, and repeat it in the top-level `TaxAmount` array
    (grouped + summed per `TaxId`). `TotalAmount` is the net **without** VAT.
-3. **You cannot update an invoice.** There is no update endpoint — to fix one,
-   `delete <id>` (requires the user's go-ahead) and create it again.
+3. **The API cannot update an invoice — but the Merit UI can.** There is no update
+   endpoint, so via the API you `delete <id>` (requires the user's go-ahead) and create
+   it again. Do **not** conclude the change is impossible: the UI edits invoices in
+   place, keeping the number, dates and payment. Before proposing delete-and-recreate
+   for a field-level fix (wrong customer, typo in a line), say so and let the user
+   decide — the UI route is almost always the better one. See
+   [reference/paid-invoices.md](reference/paid-invoices.md).
 4. **Resolve the customer before billing.** Reuse an existing customer by `Id`; only
    create a new one when none matches. `customers list` MUST be filtered.
+5. **A paid invoice is locked.** Merit refuses both the delete (`400`, "Tasutud arvet ei
+   saa kustutada. Enne kustutage makse.") and, in the UI, any change of customer,
+   currency or currency rate ("Arve on juba tasutud. Ei saa muuta klienti, valuutat ja
+   valuutakurssi ega vähendada summat."). The payment must come off first. Full
+   procedure: [reference/paid-invoices.md](reference/paid-invoices.md).
 
 ## Resolve / create the customer
 
@@ -61,6 +71,17 @@ elnora-merit customers create --data '{"Name":"Acme OÜ","CountryCode":"EE",
 
 For an EU customer, set the real `CountryCode` and `VatRegNo` (Merit validates EU VAT
 via VIES). The invoice language is a customer property (`SalesInvLang`), not a setting.
+
+Two fields bite later, so get them right now:
+
+- **`Email`** is where `send-email` silently sends every future invoice. An address
+  someone typed in a message is not a verified address. If a send to it bounces, fix the
+  customer record — don't just work around it for one invoice, or the next invoice
+  bounces too and nobody notices. Never guess a variant of a bounced address: an invoice
+  is a financial document and the guess may belong to a stranger.
+- **`PaymentDeadLine`** sets the due date on every invoice for this customer, and it
+  re-derives the due date if the invoice is later re-saved against them. See
+  [reference/paid-invoices.md](reference/paid-invoices.md).
 
 ## Create the invoice
 
@@ -134,7 +155,12 @@ see the `merit-payments-bank` skill (`payments create`, which matches by custome
 - Don't run `customers list` unfiltered — Merit returns a server stacktrace.
 - Don't put a VAT percentage on a row — use the `TaxId` guid from `taxes list`, and
   mirror it in `TaxAmount`.
-- Don't try to edit an invoice — there is no update; delete and recreate.
+- Don't tell the user an invoice "cannot be changed" — the API can't, the UI can. Say
+  which one you mean.
+- Don't propose delete-and-recreate to fix one field before checking whether the UI
+  route fits — it destroys the number, the dates and the payment link to fix a typo.
+- Don't try to delete or re-customer a **paid** invoice — remove the payment first
+  ([reference/paid-invoices.md](reference/paid-invoices.md)).
 - Don't book a 0% / reverse-charge code to "make VAT disappear" — for EU/foreign
   treatment see `merit-reverse-charge`.
 
