@@ -1,0 +1,30 @@
+name: No Committed Books
+
+# Fails if real accounting data is ever committed to this public repo — raw Merit API
+# dumps (balance sheets, GL exports, invoice/payment/customer lists). Those are the
+# company's books. gitignore covers scratch/, but a dump saved anywhere else, or force-
+# added, would otherwise sail through: gitleaks only looks for secrets, and financial
+# data is not a secret. See scripts/check-no-committed-books.mjs.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: no-committed-books-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Check no real accounting data is committed
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+      - run: node scripts/check-no-committed-books.mjs
