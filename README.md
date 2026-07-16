@@ -260,7 +260,7 @@ elnora-merit-aktiva/
 
 The plugin ships how-to skills for both products so Claude follows the correct Merit procedure, not just the raw API:
 
-- **Accounting** — `merit-aktiva-workspace` (router), `merit-sales-invoices`, `merit-purchase-invoices`, `merit-payments-bank`, `merit-vat-kmd`, `merit-reports`, `merit-reverse-charge`, `merit-stripe`.
+- **Accounting** — `merit-aktiva-workspace` (router), `merit-sales-invoices`, `merit-purchase-invoices`, `merit-payments-bank`, `merit-vat-kmd`, `merit-reports`, `merit-reverse-charge`, `merit-stripe`, `merit-lhv` (LHV bank statements via LHV's official read-only MCP server).
 - **Payroll** — `merit-palk-workspace` (router), `merit-palk-employees`, `merit-palk-payroll`, `merit-palk-reports`, `merit-palk-settings`.
 
 ---

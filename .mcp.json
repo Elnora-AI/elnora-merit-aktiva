@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "lhv": {
+      "type": "http",
+      "url": "https://mcp.lhv.ai/mcp"
+    }
+  }
+}
