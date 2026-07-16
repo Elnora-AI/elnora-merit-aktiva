@@ -134,7 +134,7 @@ Use `create-credit`: re-send the original invoice's payload with **negative `Qua
 elnora-merit sales-invoices create-credit --file credit.json
 ```
 
-## Find, fetch, deliver
+## Find and fetch
 
 ```bash
 elnora-merit sales-invoices find --inv-no 2026-014          # by number, no period
@@ -142,12 +142,69 @@ elnora-merit sales-invoices find --cust-name "Acme"         # by customer
 elnora-merit sales-invoices list --period-start 20260101 --period-end 20260331  # max 3 months
 elnora-merit sales-invoices get <SIHId>                     # full header + lines + payments
 elnora-merit sales-invoices get-pdf <SIHId>                 # { FileName, FileContent base64 }
-elnora-merit sales-invoices send-email <SIHId>              # to the customer's stored e-mail
-elnora-merit sales-invoices send-einvoice <SIHId>          # structured e-invoice; 'api-noeinv' if recipient can't receive
 ```
 
 Recording the **receipt** of a sales invoice (marking it paid) is a payments operation —
 see the `merit-payments-bank` skill (`payments create`, which matches by customer name).
+
+## Deliver the invoice
+
+```bash
+elnora-merit sales-invoices send-email <SIHId>     # PDF invoice, e-mailed by Merit
+elnora-merit sales-invoices send-einvoice <SIHId>  # structured e-invoice; 'api-noeinv' if recipient can't receive
+```
+
+**`send-email` sends a real e-mail to a real customer the moment it returns, and there is
+no undo.** Confirm with the user before calling it, exactly as you would before `create`.
+
+### The PDF is attached for you — there is no attach flag
+
+`send-email` mails the invoice **with the PDF attached** and a covering message. Neither
+is built here: both come from the mail template stored in **Seadistused → Üldised
+seadistused → E-posti seadistused**. The stock `Müügiarve` template ships with PDF
+attachment enabled and body text in ET/EN/FI/RU; Merit picks the language from the
+customer's `SalesInvLang`. So "send the invoice with the PDF attached" is just
+`send-email <SIHId>` — don't go looking for an option, and don't rebuild the PDF yourself.
+
+**`--deliv-note` is not a delivery option.** It sends the document **without prices** as a
+delivery note (saateleht). Never pass it when you mean "send the invoice".
+
+### Before the first send: the sender address must be set
+
+`send-email` needs a **default sender address** saved under Seadistused → Üldised
+seadistused → **E-posti seadistused → "Saatja e-post"** (plus the send method above it).
+That setting is company-wide and lives only in the UI — no API or CLI writes it. Until
+it's filled, the API rejects every send:
+
+```
+400 {"Message":"Müügiarve seadistustes saatja e-mail täitmata"}
+```
+
+Read that error literally: it is about **your own sender address in settings**, not about
+the customer. It does not mean the customer's e-mail is missing, and adding a recipient
+address will not fix it. Open the settings page and look before diagnosing — the field is
+named `Saatja e-post` and is the only sender field in the whole settings app.
+
+Recipient-side and id-side problems surface as different errors, so use them to tell the
+cases apart rather than guessing:
+
+| Error | Cause |
+|---|---|
+| `Müügiarve seadistustes saatja e-mail täitmata` | Your default sender is empty in settings |
+| `Sellise id-ga dokument puudub` | Bad `SIHId` — the id is checked before any mail config |
+
+The recipient is always the **customer's stored `Email`**; the API takes no per-send
+address. To send elsewhere, fix the customer record (see the `Email` warning above) — or
+use the fallback.
+
+### Fallbacks when Merit's mailer won't do
+
+1. **The UI envelope.** Open the invoice in Merit → envelope icon next to the PDF. The
+   dialog fills in recipient, sender, subject, body, and the PDF, and it uses the
+   logged-in user's address, so it works even when the settings sender is unset.
+2. **Send it yourself.** `get-pdf <SIHId>` returns `FileContent` as base64 — decode it to
+   a file and attach it to a normal e-mail. Use this when the customer needs a different
+   address or a covering note the template can't express.
 
 ## Don't
 

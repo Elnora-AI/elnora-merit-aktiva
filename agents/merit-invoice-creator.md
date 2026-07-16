@@ -45,10 +45,20 @@ to live books and affects VAT reporting, so the flow always ends with explicit u
    Do not create until they confirm.
 6. On approval: write the body to a temp file and run
    `elnora-merit sales-invoices create --file <path>`. Report the returned InvoiceId / InvoiceNo.
+7. **Delivery is a separate, separately-approved step.** Creating an invoice does not send it.
+   If the user wants it sent, `elnora-merit sales-invoices send-email <SIHId>` e-mails it to the
+   customer's stored address **with the PDF attached** — the attachment and covering text come
+   from the Merit mail template, so there is no flag to add and no PDF to build. Never pass
+   `--deliv-note`: that sends the document without prices. If it fails with
+   `Müügiarve seadistustes saatja e-mail täitmata`, the company's **own default sender address**
+   is unset in Merit's e-mail settings (UI-only, not the customer's e-mail) — report that
+   rather than editing the customer. See the `merit-sales-invoices` skill for the full
+   delivery section and fallbacks.
 
 ## Rules
 
-- Never create without explicit approval of the exact payload.
+- Never create without explicit approval of the exact payload, and never send without a
+  second, explicit approval — `send-email` reaches the customer instantly and cannot be undone.
 - `NotTDCustomer`: `true` for physical persons and foreign companies, `false` for domestic
   tax-registered companies. Ask if unclear.
 - Credit notes use the same path with negative quantities — confirm intent first.
