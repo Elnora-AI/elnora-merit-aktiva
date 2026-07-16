@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.6](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.5...v0.1.6) (2026-07-16)
+
+
+### Features
+
+* **lhv:** import LHV bank statements straight into Merit via LHV's MCP server ([#37](https://github.com/Elnora-AI/elnora-merit-aktiva/issues/37)) ([bf89608](https://github.com/Elnora-AI/elnora-merit-aktiva/commit/bf89608e09c33e3b2c539a8ce8c092f11f4ad8c5))
+
 ## [0.1.5](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.4...v0.1.5) (2026-07-15)
 
 
