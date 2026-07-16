@@ -125,13 +125,40 @@ elnora-merit payments import-statement --file statement.xml   # POST sendcamt53;
 elnora-merit payments list-imports <bankId> --booking-date-from 2026-06-01  # window max 3 months
 ```
 
+**FIRST: check the period isn't already booked.** Compare the bank's GL account balance
+(`reports balance-sheet --end-date <to>`) with the statement's real closing balance. **If they
+match, the period is already booked — do not import.** Then `gl list-full --period-start
+<from> --period-end <to> --with-lines 1` and look for `PA` batches crediting the bank account;
+if they cover these dates, the statement is already in.
+
+**Do not treat idempotency as that check.** It skips its own prior imports and some
+hand-entered payments, but **not payments posted via the API**. A live run reported
+`Imporditi 17 makserida (ridu kokku 19)` — skipping 2 — when in fact **all 19 were already
+booked**. The count tells you what got queued, not what was needed.
+
 - Supported: `camt.053.001.02` and `camt.053.001.10`. The bank account must have a correct
-  IBAN. Import is **idempotent** — re-importing the same statement does not duplicate rows.
-- **The match-and-confirm step is UI-only.** In Merit, green rows auto-match and can be
-  confirmed; others are matched in the **"Võlgnevused"** column (links customer/vendor/tax
-  invoices) or **"Muud"** (everything else), then confirmed. The CLI imports and lists
-  rows; it does not confirm them. Do not delete unconfirmed rows — add the missing
-  documents and match instead.
+  IBAN, and Merit bank accounts are **per-currency** — a `<Stmt>` whose `Ccy` has no matching
+  bank account has nowhere to land, and the API has **no bank-write endpoint** to add one
+  (UI only).
+- **Import posts no GL entries.** It queues rows in *Maksed*. The success string ends
+  `koostati pearaamatu kanded`, but with `Kinnitati 0 makserida` nothing is posted (verified:
+  zero GL batches, bank balance unmoved). **Confirming** is what posts — and what is
+  irreversible. An unconfirmed queue is harmless.
+- **The match-and-confirm step is UI-only**, and the choice of column decides whether you
+  duplicate the books:
+  - **Võlgnevused** → Dr existing liability / Cr bank. **Clears** an invoice already booked.
+  - **Muud** → Dr a GL account / Cr bank. **Creates a new expense.**
+
+  Using **Muud** on a payment whose invoice already exists (`OA` batch) books the expense a
+  **second time** and leaves the original liability uncleared. Symptom: the bank account drops
+  below the real balance, often negative. If `gl list-full` shows an `OA` batch for that
+  merchant and amount, the row is a **Võlgnevused** match.
+- **Discard unconfirmed rows that duplicate existing entries** — matching them is the error.
+  (Rows representing genuinely unbooked movements are different: add the missing document and
+  match, don't delete.)
+- **A bank-balance tie does not prove there is no duplicate** — it only tests the bank leg. An
+  expense can be booked twice while the bank still ties. Check the expense account's debits
+  over the window as well.
 
 ## Settlements, prepayments, transfers, currency
 
@@ -159,7 +186,12 @@ elnora-merit payments list-imports <bankId> --booking-date-from 2026-06-01  # wi
   imported statement) — reconcile it once, in the statement.
 - Don't leave a clearing/transit or settlement out of balance — those must net to zero.
 - `delete` a payment only when the user explicitly asks — payments have complex GL
-  relations and deletion is high-risk.
+  relations and deletion is high-risk over the API. Doing it **in the UI** (Maksed →
+  bank → Maksete nimekiri → Kustuta) is a normal supported operation, and it is the
+  required first step before a paid invoice can be re-customered or deleted — see
+  `merit-sales-invoices` → [reference/paid-invoices.md](../merit-sales-invoices/reference/paid-invoices.md).
+  Note the row's date, document no, customer, amount and viitenumber before deleting;
+  you re-enter them by hand afterwards.
 
 ## Safety
 

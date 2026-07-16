@@ -59,33 +59,99 @@ Only `get_transactions` feeds Merit. The other three answer questions ("what's t
 balance", "what did we spend on X") and should never be used to *book* anything —
 summaries are aggregates, not statement rows.
 
+## STEP 0 — Is this period already booked? (never skip this)
+
+**The most likely outcome of an LHV import is that it was not needed.** The books are usually
+already done by the time anyone reaches for a statement. Importing an already-booked period
+and matching the rows **double-books it**. Establish that the period is genuinely unbooked
+*before* pulling anything.
+
+**Merit's idempotency is not a safety net — do not lean on it.** In a live run it skipped
+**2 rows out of 19 while all 19 were already booked**. It recognises its own prior imports
+and some hand-entered payments, but payments posted through the API are invisible to it. The
+reassuring `Imporditi 17 makserida` meant "17 duplicates queued", not "17 rows were needed".
+
+Compare the bank account's GL balance against the bank's own closing balance:
+
+```
+elnora-merit banks list                                              # bankId, IBAN, CurrencyCode, AccountCode
+elnora-merit reports balance-sheet --end-date <dateTo> --per-count 1 # that AccountCode's balance
+```
+
+- **GL balance == the bank's real closing balance → ALREADY BOOKED. STOP.** There is nothing
+  to import. This is the normal case, not an edge case.
+- They differ → the gap is what is genuinely unbooked. Import only that window.
+
+Then read what is already posted, which also shows *how* it was booked:
+
+```
+elnora-merit gl list-full --period-start <from> --period-end <to> --with-lines 1
+```
+
+Inspect `Entries[].AccountCode` (note: `Entries`, not `Lines`). `PA` batches crediting the
+bank account are bank payments that **already exist** — if they cover these dates, the
+statement is already in. `OA` batches debiting an expense account are the purchase invoices
+behind them.
+
 ## Import an LHV statement into Merit
+
+Only once Step 0 says the period is genuinely unbooked:
 
 ```
 1. list_accounts                          → pick the IBAN
 2. get_transactions(iban, from, to)       → max 31 days per call
 3. write the .xml FIELD to a file         → not the JSON envelope (see traps)
-4. elnora-merit banks list                → find the bankId for that IBAN + currency
-5. elnora-merit payments import-statement --file statement.xml
-6. elnora-merit payments list-imports <bankId> --booking-date-from <from>
-7. match + confirm in the Merit UI        → UI-only, not the CLI's job
+4. verify the file against its own totals → see below
+5. elnora-merit banks list                → bankId for that IBAN + currency
+6. elnora-merit payments import-statement --file statement.xml
+7. elnora-merit payments list-imports <bankId> --booking-date-from <from>
+8. match + confirm in the Merit UI        → UI-only; read "Muud vs Võlgnevused" FIRST
 ```
 
-Step 5 writes to the live books — it adds the rows to the payment list **and creates the
-general-ledger entries** (`koostati pearaamatu kanded`), unconfirmed. Confirm with the user
-before running it, and respect closed periods.
+**What the import does — and does not do.** It queues rows in *Maksed* and posts **no GL
+entries**. The success string ends `koostati pearaamatu kanded` ("general ledger entries were
+created"), but that is boilerplate describing the feature in general; with `Kinnitati 0
+makserida` nothing is posted. Verified: after importing 17 rows, **zero** GL batches carried
+that timestamp, and the bank account's balance did not move. The GL entry appears when you
+**confirm**, not when you import.
 
-`import-statement` is **idempotent**, and more broadly than it first appears: it skips rows
-**already entered by hand**, not just rows previously imported. A verified run reported
-`Imporditi 17 makserida (ridu kokku 19)` — the two skipped rows were a customer receipt and
-a vendor payment already booked manually. So a retry after a failure is safe, and importing
-over a partly hand-booked month does not double up.
+Corollary: an unconfirmed queue is harmless and reversible — **confirming is the irreversible
+step**. If Step 0 was skipped and the rows turn out to be duplicates, discard the queue;
+nothing was posted.
 
 **Verify the file before importing it.** camt.053 declares its own totals in `<TxsSummry>`
 and its opening/closing balances in `<Bal>`. Parse the file and check that the counted
 `<Ntry>` credits/debits tie to `TtlCdtNtries`/`TtlDbtNtries`, and that
 `OPBD + credits − debits == CLBD`. Three independent ties, and they cost nothing — if the
 XML was truncated or mangled in transit, this catches it before Merit posts anything.
+
+## Muud vs Võlgnevused — the choice that double-books
+
+When you confirm a queued row you must tell Merit what the money *was*. The two buttons are
+not interchangeable, and picking the wrong one silently duplicates the expense:
+
+| Button | What it posts | Use when |
+|---|---|---|
+| **Võlgnevused** | Dr *existing liability* / Cr bank — **clears** an invoice already booked | The expense already exists as a purchase invoice (`OA` batch) |
+| **Muud** | Dr *a GL account* / Cr bank — **creates a brand-new expense** | The expense is not in the books at all |
+
+**`Muud` on an already-invoiced payment books the expense a second time.** The `OA` batch
+already debited the expense account; `Muud` debits it again and leaves the original liability
+uncleared. The bank is double-credited too, so the bank balance drops below the real one —
+often into negative, which is the usual first symptom.
+
+Rule: if `gl list-full` shows an `OA` batch for that merchant and amount, the row is a
+**Võlgnevused** match. Only genuinely un-invoiced movements (bank fees, interest) are `Muud`.
+
+**Do not use a bank-balance tie as proof that nothing is duplicated.** It only tests the bank
+leg. An expense can be booked twice while the bank still ties — check the expense account's
+debits over the window too, not just the bank.
+
+**Recovery.** A wrong `Muud` confirmation is a plain expense payment with no invoice links
+(`DocumentId: null`), and `payments delete <id> --yes` removes it cleanly — verified, with the
+bank balance returning to the exact prior figure. Delete one at a time and re-check the bank
+balance after each. Payments *linked to invoices* are a different matter; that is what the
+command's high-risk warning is about.
 
 ## Traps
 
