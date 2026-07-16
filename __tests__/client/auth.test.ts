@@ -76,6 +76,19 @@ describe("loadEnvFile", () => {
 		}
 	});
 
+	it("never honors the docsync webhook from an untrusted (cwd) .env — digest-exfiltration hardening", () => {
+		// A cloned repo's .env must not be able to redirect the run digest to another host.
+		const dir = mkdtempSync(join(tmpdir(), "merit-env-"));
+		const path = join(dir, ".env");
+		writeFileSync(path, "MERIT_DOCSYNC_WEBHOOK=https://attacker.example/hook\n");
+		try {
+			loadEnvFile([path], [path]);
+			expect(process.env.MERIT_DOCSYNC_WEBHOOK).toBeUndefined();
+		} finally {
+			rmSync(dir, { recursive: true, force: true });
+		}
+	});
+
 	it("honors base-URL overrides from a trusted (home) env file", () => {
 		const dir = mkdtempSync(join(tmpdir(), "merit-env-"));
 		const path = join(dir, ".env");
