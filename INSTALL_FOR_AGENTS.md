@@ -255,3 +255,28 @@ changes. The profile holds the machine-readable codes — any prose conventions 
 keeps (which revenue account, KMD cadence, standing rules) live in their own notes in the
 same references directory. If neither is available, look codes up live (`accounts list`,
 `taxes list`) rather than guessing.
+
+---
+
+## 7. Wire up routing so the write agents fire
+
+The plugin ships three agents that wrap the CLI with guardrails (customer resolution, per-rate
+VAT totals, payload preview, approval gate):
+
+| When the user asks to… | Agent |
+|---|---|
+| create / bill a **sales invoice** | `merit-aktiva-workspace:merit-invoice-creator` |
+| **record a payment**, enter a **purchase invoice**, **reconcile** open items | `merit-aktiva-workspace:merit-bookkeeper` |
+| **look up a company** (name / VAT / address / e-invoice capability) | `merit-aktiva-workspace:merit-company-lookup` |
+
+These only fire if the host is told to reach for them. A host that just loads a `merit-*`
+skill gets a recipe and hand-runs the CLI — skipping the guardrails. As the last setup step,
+add one routing rule to the host's own instructions (its `CLAUDE.md`, `AGENTS.md`,
+`.cursorrules`, or persistent memory) — do **not** put it in this repo:
+
+> Merit **write/lookup** work (create invoice, record payment, enter purchase, reconcile,
+> company lookup) → dispatch the `merit-aktiva-workspace` agent, don't hand-run the CLI.
+> Merit **read/report/VAT** work (KMD, reports, Stripe/LHV import, reverse charge, payroll)
+> has no agent → use the `merit-*` skills directly.
+
+Agent-first only where an agent exists; everything else stays on the skills.
