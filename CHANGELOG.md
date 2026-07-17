@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.7](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.6...v0.1.7) (2026-07-17)
+
+
+### Bug Fixes
+
+* **security:** never honor MERIT_DOCSYNC_WEBHOOK from an untrusted cwd .env ([#42](https://github.com/Elnora-AI/elnora-merit-aktiva/issues/42)) ([4a6a8d0](https://github.com/Elnora-AI/elnora-merit-aktiva/commit/4a6a8d0e2f22fed27d61f6c88583613888ad3566))
+
 ## [0.1.6](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.5...v0.1.6) (2026-07-16)
 
 
