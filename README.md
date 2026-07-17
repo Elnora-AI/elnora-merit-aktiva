@@ -41,6 +41,22 @@ Paste these two slash commands into Claude Code one at a time — wait for the f
 
 The plugin uses the `elnora-merit` CLI under the hood, so install that first.
 
+### Make the write agents actually fire
+
+The plugin ships three agents that wrap the CLI with guardrails — resolve the customer, build per-rate VAT totals, preview the payload, gate on your approval:
+
+| When you ask to… | Agent |
+|---|---|
+| create / bill a **sales invoice** | `merit-aktiva-workspace:merit-invoice-creator` |
+| **record a payment**, enter a **purchase invoice**, **reconcile** open items | `merit-aktiva-workspace:merit-bookkeeper` |
+| **look up a company** (legal name / VAT / address / e-invoice capability) | `merit-aktiva-workspace:merit-company-lookup` |
+
+A host that only loads the `merit-*` skills gets a *recipe* and then hand-runs the CLI itself — skipping those guardrails. To make the agents fire at the right time, add one routing rule to **your host's own instructions** (Claude Code `CLAUDE.md`, `AGENTS.md`, `.cursorrules`, or persistent agent memory), e.g.:
+
+> For Merit **write/lookup** work (create invoice, record payment, enter purchase, reconcile, company lookup) dispatch the `merit-aktiva-workspace` agent above — do not hand-run the `elnora-merit` CLI. **Read/report/VAT** work (KMD, reports, Stripe/LHV import, reverse charge, payroll) has no agent — use the `merit-*` skills directly.
+
+That write-vs-read split is the whole rule: agent-first only where an agent exists.
+
 ---
 
 ## Authenticate
