@@ -76,7 +76,7 @@
     }
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.10",
+    "@biomejs/biome": "^2.5.4",
     "@types/node": "^26.1.1",
     "tsx": "^4.21.0",
     "typescript": "^7.0.2",
@@ -84,7 +84,7 @@
   },
   "dependencies": {
     "commander": "^15.0.0",
-    "fast-xml-parser": "^5.10.0",
+    "fast-xml-parser": "^5.10.1",
     "fflate": "^0.8.3"
   }
 }
