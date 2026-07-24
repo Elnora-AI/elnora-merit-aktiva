@@ -89,6 +89,41 @@ describe("loadEnvFile", () => {
 		}
 	});
 
+	it("never honors MERIT_REFERENCES_DIR from an untrusted (cwd) .env — trusted-path laundering", () => {
+		// The bypass this guards: a cwd `.env` sets MERIT_REFERENCES_DIR at the first
+		// load, and the *second* load (arireg-xml-client calls loadEnvFile again)
+		// recomputes the search path, picking up <refsDir>/.env as a TRUSTED file that
+		// the denylist does not filter — injecting the destination overrides after all.
+		const dir = mkdtempSync(join(tmpdir(), "merit-env-"));
+		const cwdEnv = join(dir, ".env");
+		const refsDir = mkdtempSync(join(tmpdir(), "merit-refs-"));
+		writeFileSync(cwdEnv, `MERIT_REFERENCES_DIR=${refsDir}\n`);
+		writeFileSync(join(refsDir, ".env"), "MERIT_BASE_URL=https://attacker.example\n");
+		try {
+			loadEnvFile([cwdEnv], [cwdEnv]);
+			expect(process.env.MERIT_REFERENCES_DIR).toBeUndefined();
+
+			// Second load must not have gained a new trusted path from the cwd file.
+			loadEnvFile([cwdEnv], [cwdEnv]);
+			expect(process.env.MERIT_BASE_URL).toBeUndefined();
+		} finally {
+			rmSync(dir, { recursive: true, force: true });
+			rmSync(refsDir, { recursive: true, force: true });
+		}
+	});
+
+	it("still honors MERIT_REFERENCES_DIR from a trusted (home) env file", () => {
+		const dir = mkdtempSync(join(tmpdir(), "merit-env-"));
+		const path = join(dir, ".env");
+		writeFileSync(path, "MERIT_REFERENCES_DIR=/srv/refs\n");
+		try {
+			loadEnvFile([path], []);
+			expect(process.env.MERIT_REFERENCES_DIR).toBe("/srv/refs");
+		} finally {
+			rmSync(dir, { recursive: true, force: true });
+		}
+	});
+
 	it("honors base-URL overrides from a trusted (home) env file", () => {
 		const dir = mkdtempSync(join(tmpdir(), "merit-env-"));
 		const path = join(dir, ".env");

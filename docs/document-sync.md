@@ -118,7 +118,10 @@ The run produces a digest and delivers it to whichever you configure:
 The digest carries vendor names, invoice numbers, amounts and local file names, so
 the webhook is a data destination. `MERIT_DOCSYNC_WEBHOOK` is therefore only honored
 from the real environment or the home env file — never from a `.env` in the current
-directory, which a cloned repo could ship.
+directory, which a cloned repo could ship. `MERIT_REFERENCES_DIR` is refused from
+that same file for the same reason: it relocates the references dir, and the `.env`
+found there is trusted, so honoring it would let a cloned repo reintroduce the
+webhook override it is otherwise denied.
 
 ## Scheduling
 

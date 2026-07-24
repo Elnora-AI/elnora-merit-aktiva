@@ -83,7 +83,19 @@ function parseEnvFile(path: string): Record<string, string> {
 // real API within the timestamp window). The same applies to the docsync webhook,
 // which receives a digest of accounting data and local file names. Destination
 // overrides are only honored from the real environment or the home env file.
-const CWD_DENYLIST = new Set(["MERIT_BASE_URL", "MERIT_PALK_BASE_URL", "MERIT_DOCSYNC_WEBHOOK"]);
+//
+// MERIT_REFERENCES_DIR is denied for a subtler reason: it is not itself a
+// destination, but it names a directory whose `.env` defaultEnvPaths() treats as
+// TRUSTED (opted into, so exempt from this denylist). Honoring it from the cwd
+// `.env` would let a cloned repo point at its own directory and have the very keys
+// above injected from there on the next loadEnvFile() call — laundering an
+// untrusted file into a trusted one and defeating the entries above.
+const CWD_DENYLIST = new Set([
+	"MERIT_BASE_URL",
+	"MERIT_PALK_BASE_URL",
+	"MERIT_DOCSYNC_WEBHOOK",
+	"MERIT_REFERENCES_DIR",
+]);
 
 /**
  * Hydrate process.env from the home and cwd env files without overwriting any
