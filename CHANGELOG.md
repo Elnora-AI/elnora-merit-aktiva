@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.9](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.8...v0.1.9) (2026-07-30)
+
+
+### Bug Fixes
+
+* **skills:** correct merit-tsd lisa 6 totals to the current e-MTA form ([#52](https://github.com/Elnora-AI/elnora-merit-aktiva/issues/52)) ([a953677](https://github.com/Elnora-AI/elnora-merit-aktiva/commit/a95367790049f9e9643cf249856149df9dc7e628))
+
 ## [0.1.8](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.7...v0.1.8) (2026-07-30)
 
 
