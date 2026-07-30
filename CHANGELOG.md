@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.8](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.7...v0.1.8) (2026-07-30)
+
+
+### Features
+
+* **skills:** add merit-tsd for the non-payroll TSD annexes ([#50](https://github.com/Elnora-AI/elnora-merit-aktiva/issues/50)) ([a3f9ca9](https://github.com/Elnora-AI/elnora-merit-aktiva/commit/a3f9ca944163c930e004e0dd4df25f8e9a5c84a0))
+
 ## [0.1.7](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.6...v0.1.7) (2026-07-17)
 
 
