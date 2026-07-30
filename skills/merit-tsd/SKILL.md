@@ -90,13 +90,25 @@ debt formally **rescheduled** (ajatatud) where the tax was not assessed by a mak
 | 6050 | Bribes and kickbacks |
 | 6060 | Non-profit joining and membership fees (§ 51 lg 2 p 2) |
 | 6070 | Payments made on a missing or non-conforming source document (§ 51 lg 2 p 3) |
-| 6080 | Discharging non-business obligations (§ 51 lg 2 p 5) — **also where interest imposed under *foreign* law goes** |
-| 6140 | Taxable amount = sum of 6000–6130 **excluding 6011, 6021 and 6041** |
+| 6080 | Non-business obligations, asset and service purchases, excess borrowing cost (§ 51 lg 2 p 4–5) — **also where interest imposed under *foreign* law goes** |
+| 6090–6130 | Non-cooperative-jurisdiction items (securities, holdings, penalties, loans) and credit-institution losses |
+| 6140 | **Maksustatud summa vähendamine** — reduction of an amount taxed in an earlier period |
+| 6141 / 6142 / 6143 | The earlier period that fell away: month / year / amount |
+| **6150** | **Maksustatav summa kokku** — the taxable total |
+| **6160** | **Tasutav tulumaks** — the tax due |
+| 6170 | Tagastatav tulumaks |
+
+**6150 is the total, not 6140.** Older write-ups (and the pre-2022 form PDF) show 6140 as the
+sum of 6000–6130; the current form inserted the prior-period reversal block at 6140–6143 and
+moved the taxable total to **6150**, with the tax at **6160**. Read the live form, not an
+archived PDF.
 
 **The `x1` codes are memo lines, not additions.** 6011 / 6021 / 6041 are pre-filled by the
-tax authority from its own records and are explicitly excluded from the base at 6140. Enter
-the full amount on 6010 / 6020 / 6040; do not also add the pre-filled figure, and do not
-subtract it.
+tax authority from its own records and are excluded from the taxable total. Enter the full
+amount on 6010 / 6020 / 6040; do not also add the pre-filled figure, and do not subtract it.
+Worked example: interest of 100,00 entered on 6020, with 6021 also pre-filled at 100,00,
+gives `6150 = 100,00` and `6160 = 28,21` (`100 ÷ 0,78 × 22 %`) — the pre-fill is not
+double-counted into the base.
 
 ## lisa 5 — vastuvõtukulud, kingitused, annetused
 
@@ -109,16 +121,23 @@ charged with personalised social tax**.
 **TuMS § 49 lg 5** allows a summed recalculation, and lisa 5 implements it directly:
 
 ```
-5100  entertainment costs — this calendar MONTH
-5110  entertainment costs — calendar YEAR to date
+5100  entertainment costs — this calendar MONTH   <- the ONLY field you type into
+5110  entertainment costs — calendar YEAR to date  (computed)
 5120  allowance = [lisa 1 (1200 + 1201 − 1500) + lisa 2 (2200 + 2201 − 2500)] ≥ 0 × 2 %
-                 + (50 × calendar-month number)
+                 + (50 × calendar-month number)    (computed)
+5130  calculated tax · 5140 / 5150 adjusted        (computed)
+5160  tax due · 5170 tax refundable → both carry to TSD code 114
 ```
 
 Taxable = `5110 − 5120`, floored at zero. In July the fixed part of the pool is already
 `7 × 50 = 350 €`, not 50 €. **Never judge a single month against 50 €** — a company that
 spent nothing January–June can spend the whole accumulated pool in July tax-free. The
 allowance resets on 1 January; a new year starts the count from scratch.
+
+**Only 5100 is editable.** 5110 and 5120 are computed by the tax authority from the year's
+declarations — do not try to force them. Worked example: a company with 2 000,00 of
+social-taxed payments year-to-date, filing for July, gets `5120 = (50 × 7) + (2 % × 2 000) =
+390,00`. Any 5110 up to 390,00 is fully exempt; only the excess reaches 5130.
 
 **Gifts and donations** use the parallel pair: **5000** (fully taxable gifts/donations),
 **5010** month / **5020** year for gifts and donations to listed (nimekirja kantud)
@@ -151,6 +170,9 @@ code 114.
 - Don't re-send a TSD that was already submitted — check whether the month is settled first;
   a second send is a correction return, not a no-op.
 - Don't assume Merit Palk's TSD is the whole return when the month also has lisa 5 or lisa 6.
+- **Don't send Merit Palk's TSD for a month with no payroll.** It transmits a nil return, which
+  registers a filed TSD for that period with lisa 5 and lisa 6 missing — you then have to
+  correct a return you never needed to send. Enter that month directly in e-MTA instead.
 - Don't treat foreign-law interest as code 6020 — it belongs on 6080.
 - Don't cite § 34 p 2 for any of this; that clause has been repealed since 01.01.2000.
 
