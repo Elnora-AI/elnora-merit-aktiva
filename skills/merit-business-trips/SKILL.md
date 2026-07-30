@@ -88,9 +88,17 @@ can still pay their **travel + accommodation** cleanly if there is a real busine
 A genuine **business-partner** meal/reception (food, accommodation, transport, entertainment for
 guests/partners) is **representation**, a different stream from travel and from päevaraha.
 - **Tax-free up to 50 € per calendar month + 2 % of that month's social-tax-charged payroll** —
-  **TuMS § 49 lg 4** (the 50 € figure applies from 01.01.2025; older "32 €" is stale). Unused
-  allowance carries forward within the calendar year (§ 49 lg 5). Excess is taxed **22/78** and
-  declared on **TSD lisa 5**.
+  **TuMS § 49 lg 4** (the 50 € figure applies from 01.01.2025; older "32 €" is stale). Excess is
+  taxed **22/78** and declared on **TSD lisa 5**.
+- **The allowance accumulates across the calendar year — never test a single month against 50 €.**
+  **§ 49 lg 5** allows a summed recalculation, and lisa 5 computes it as
+  `5120 = 2 % × YTD social-taxed payments + (50 × calendar-month number)`, measured against **5110**
+  (year-to-date entertainment), not against the month. By July the fixed part of the pool is
+  `7 × 50 = 350 €`. A company that spent nothing earlier in the year can spend the whole pool
+  tax-free later. Details and the full code list: skill `merit-tsd`.
+- **Declare it even when fully exempt.** A vastuvõtukulu makes the month's TSD mandatory
+  (**§ 54 lg 2**) and code 5100 must be filled in the month the cost was made — that is what drives
+  the accumulation.
 - **The host's own meal counts** when the company's people are at the event **on work duties (hosting
   partners)** — EMTA treats that portion as vastuvõtukulud, not a fringe benefit. This explicitly
   covers representation costs incurred **on a foreign business trip**. The opposite case — an event
@@ -106,4 +114,4 @@ guests/partners) is **representation**, a different stream from travel and from 
 | Flights | travel | Töölähetuse kulud | zero-rated, gross | not reverse charge |
 | Foreign hotel | travel | Töölähetuse kulud | foreign VAT, gross | not reverse charge |
 | Non-employee's covered travel | VÕS § 628 + käsundusleping + TÖR | Töölähetuse kulud | as above | TÖR registration; no päevaraha |
-| Business-partner meal | vastuvõtukulud | Vastuvõtukulud | non-deductible | TSD lisa 5 on excess over 50 € + 2 % |
+| Business-partner meal | vastuvõtukulud | Vastuvõtukulud | non-deductible | TSD lisa 5 always; taxed only above the **year-cumulative** 50 €/month + 2 % pool |

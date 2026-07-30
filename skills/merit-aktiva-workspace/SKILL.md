@@ -30,6 +30,7 @@ flow to the agent). Skills carry the correct Merit method; the CLI is the mechan
 | **VAT / KMD** — tax codes, what feeds a KMD line, VAT reconciliation | Skill: `merit-vat-kmd` |
 | Pull a **report** — P&L, balance sheet, sales/purchase, customer debts | Skill: `merit-reports` |
 | Reverse-charge VAT on an EU / foreign supplier invoice | Skill: `merit-reverse-charge` |
+| **TSD lisa 5 / lisa 6** — entertainment, gifts, fines, tax-authority interest, "do we owe a TSD this month" | Skill: `merit-tsd` |
 | How Stripe must be set up / recorded (clearing method, fees, VAT) | Skill: `merit-stripe` |
 | Preview / status of Stripe→Merit payout reconciliation | Slash command: `/merit-reconcile` |
 | Book Stripe payouts into Merit (writes) | Agent: `merit-bookkeeper` |
