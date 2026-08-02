@@ -88,7 +88,9 @@ payroll taxes (TSD), etc. Two things bite in the bank import:
 2. **Match the declared return against the standing prepayment credits.** In the Võlgnevused
    window pick the tax-authority vendor. Merit lists, against that vendor, both:
    - **declared return liabilities** as positive debts — e.g. a VAT-return row `KD-MM-YYYY`
-     (käibedeklaratsioon) due the **20th** of the following month, and
+     (käibedeklaratsioon) due the **20th** of the following month, or the next working day
+     when the 20th falls on a public holiday or weekend (MKS § 50 lg 1 applies
+     TsÜS § 136 lg 8), and
    - **accumulated prepayment credits** as negative rows (`Ettemaks KD-…`) sitting on the
      tax prepayment account from earlier over-payments.
 

@@ -18,8 +18,11 @@ the invoice lines carry a non-zero VAT rate, Merit:
 - self-assesses the reverse charge onto the KMD: net value on lines **1, 6, 6.1**,
   the VAT as both output (line **4**) and input (line **5**).
 
-It posts **no GL entry** for the reverse charge — the calculation is for the KMD only.
-There is no reverse-charge tax code in Merit; the lever is solely the vendor country.
+It also posts a **real GL entry** for the reverse charge: the invoice debits the
+reverse-charge VAT account and credits the sales-VAT account for the self-assessed amount,
+and the monthly KMD closing entry clears the pair. The account codes are whatever your own
+chart of accounts uses — read them from `accounts list` rather than assuming. There is no
+reverse-charge tax code in Merit; the lever is solely the vendor country.
 
 ## Decision table
 
@@ -91,8 +94,9 @@ elnora-merit purchase-invoices create --data '{
 Notes:
 - `TotalAmount` = net (without VAT). For a reverse-charge foreign vendor, payable = net.
 - `TaxAmount.Amount` = `0` — the foreign vendor charged no VAT, so nothing is credited to
-  the VAT payable account. Merit derives the reverse-charge figures for the KMD from the
-  vendor country + the row's `TaxId` rate, separately from the GL.
+  the VAT payable account. Merit derives the reverse-charge figures from the vendor country
+  + the row's `TaxId` rate, and posts them to the GL as the self-assessed VAT pair described
+  above. A `0` here means "the vendor charged no VAT", not "no reverse charge was applied".
 - `Type` in `Item`: `2` = service, `1` = stock, `3` = item. Use the right one for goods vs
   services so line 6.1 populates correctly for goods.
 - `Item.Code` and `GLAccountCode` must already exist in the company.
@@ -102,13 +106,19 @@ Notes:
 
 After posting, confirm the reverse charge actually landed before relying on it:
 
-1. Pull the VAT report / KMD for the period (`reports`, or the Merit UI VAT return).
-2. Check the value appears on **line 1** plus **6 / 6.1** (EU) or **7** (non-EU service),
+1. **Read the posted GL batch** (`gl list` for the period, then `gl get <GLBId>`). A correct
+   reverse charge shows the self-assessed VAT as a debit to the reverse-charge VAT account
+   and a matching credit to the sales-VAT account, alongside the expense debit and the
+   payable credit. **This is the definitive test** — do not judge it from the invoice header,
+   which reports `TaxAmount = 0` by design.
+2. Pull the VAT report / KMD for the period (`reports`, or the Merit UI VAT return).
+3. Check the value appears on **line 1** plus **6 / 6.1** (EU) or **7** (non-EU service),
    and the VAT mirrors on **lines 4 and 5** (net €0 when fully deductible).
-3. Check the **vendor balance** equals the net (no VAT added).
+4. Check the **vendor balance** equals the net (no VAT added).
 
-If line 4/5 stayed empty, the vendor country is wrong (set to `EE`, or flagged non-EU) or
-the line was booked at 0% — fix the vendor card / row `TaxId` and re-post.
+If the GL pair is absent or line 4/5 stayed empty, the vendor country is wrong (set to `EE`,
+or flagged non-EU) or the line was booked at 0% — fix the vendor card / row `TaxId` and
+re-post.
 
 ## Common mistakes
 
