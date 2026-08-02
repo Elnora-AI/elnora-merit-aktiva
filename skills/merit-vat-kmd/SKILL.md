@@ -73,9 +73,19 @@ Standard EMTA KMD form; Merit populates it from each line's tax code. The rows t
 | **6 / 6.1 / 7** | Reverse-charge acquisitions (intra-EU goods+services / goods / other) | Reverse-charge purchases — see `merit-reverse-charge` |
 | **10 / 11** | Adjustment increasing / decreasing input VAT | Manual GL correction (e.g. proportional-VAT year-end) |
 
-Reverse charge appears on 6/6.1/7 (and mirrored 4/5) but Merit posts **no GL entry** for
-it — so the KMD's VAT totals differ from the GL VAT-account balances by exactly the
-reverse-charge amount. Expected, not an error. Full procedure: `merit-reverse-charge`.
+Reverse charge appears on 6/6.1/7 (and mirrored 4/5), and Merit **does** post a GL entry for
+it: the purchase invoice debits the reverse-charge VAT account and credits the sales-VAT
+account for the self-assessed amount, and the monthly KMD closing entry clears the pair. (The
+account codes are whatever your own chart of accounts uses — read them from `accounts list`,
+don't assume.) So the GL VAT accounts and the KMD are expected to agree; a gap between them
+is a real break to investigate, not a by-product of reverse charge.
+
+Merit zeroes the invoice's *payable* VAT, so a reverse-charge purchase reports
+`TaxAmount = 0` on the invoice header. **That header value is not the test.** To confirm
+reverse charge actually applied, read the posted GL batch (`gl get <GLBId>`) and look for the
+self-assessed debit/credit VAT pair. `TaxAmount = 0` on a foreign-vendor purchase that
+carries a standard-rate line is correct, not missing VAT — do not "fix" it.
+Full procedure: `merit-reverse-charge`.
 
 ## Time of supply (tax point)
 
@@ -89,8 +99,10 @@ prepaid items declared by payment month).
 
 There is no pay-the-tax endpoint beyond the normal bank flow. When you pay the VAT, the KMD
 liability appears in the bank-import **Võlgnevused** window as a `KD-MM-YYYY` debt against the
-**tax-authority vendor (Maksu- ja Tolliamet)**, due the **20th** of the following month. Match
-the payment there — Merit nets it against any standing tax-account prepayment credits
+**tax-authority vendor (Maksu- ja Tolliamet)**, due the **20th** of the following month, or
+the **next working day** when the 20th falls on a public holiday or weekend (MKS § 50 lg 1
+applies TsÜS § 136 lg 8). Take the due date EMTA itself shows rather than assuming the 20th.
+Match the payment there — Merit nets it against any standing tax-account prepayment credits
 (`Ettemaks KD-…` rows), so the figure you actually paid can be less than the return total.
 Do **not** book it as a GL / "Muud" entry; the UI blocks tax payments from the general ledger.
 Full mechanics in `merit-payments-bank`.
