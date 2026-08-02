@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.10](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.9...v0.1.10) (2026-08-02)
+
+
+### Bug Fixes
+
+* **skills:** reverse charge does post a GL entry, and the KMD due date can roll ([#54](https://github.com/Elnora-AI/elnora-merit-aktiva/issues/54)) ([7ffbe3a](https://github.com/Elnora-AI/elnora-merit-aktiva/commit/7ffbe3a3062e5e6d35de5b916650faa1a16885d2))
+
 ## [0.1.9](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.8...v0.1.9) (2026-07-30)
 
 
