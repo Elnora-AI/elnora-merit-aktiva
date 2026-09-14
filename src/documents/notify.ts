@@ -48,10 +48,33 @@ export function formatDigest(summary: RunSummary): string {
 	return lines.join("\n");
 }
 
+/**
+ * Validate a configured webhook URL before anything is sent to it.
+ *
+ * The digest names parties, bill numbers, gross totals and the document files
+ * matched on disk, so it must not leave the machine in cleartext. The URL is
+ * operator-supplied (config file or MERIT_DOCSYNC_WEBHOOK) and was previously
+ * passed to fetch() unchecked, so a typo or an http:// endpoint would ship
+ * accounting data unencrypted and only surface as an opaque fetch error.
+ */
+export function assertWebhookUrl(raw: string): URL {
+	let parsed: URL;
+	try {
+		parsed = new URL(raw);
+	} catch {
+		throw new Error(`docsync webhook URL is not a valid URL: ${raw}`);
+	}
+	if (parsed.protocol !== "https:") {
+		throw new Error(`docsync webhook URL must be https (got ${parsed.protocol.replace(":", "")})`);
+	}
+	return parsed;
+}
+
 /** Deliver the digest via webhook or notifyCommand. Returns how it was delivered. */
 export async function deliverDigest(text: string, config: DocsyncConfig): Promise<"webhook" | "command" | "none"> {
 	if (config.webhookUrl) {
-		const res = await fetch(config.webhookUrl, {
+		const endpoint = assertWebhookUrl(config.webhookUrl);
+		const res = await fetch(endpoint, {
 			method: "POST",
 			headers: { "content-type": "application/json" },
 			body: JSON.stringify({ text }),
