@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.11](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.10...v0.1.11) (2026-09-15)
+
+
+### Bug Fixes
+
+* **docsync:** require https for the notification webhook ([5abec40](https://github.com/Elnora-AI/elnora-merit-aktiva/commit/5abec40ec70683c64babfb33de782e38cb22fed8))
+* **docsync:** require https for the notification webhook ([38f83b6](https://github.com/Elnora-AI/elnora-merit-aktiva/commit/38f83b62ca6563a83ffca1af1b3cc892690ef91a))
+
 ## [0.1.10](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.9...v0.1.10) (2026-08-02)
 
 
