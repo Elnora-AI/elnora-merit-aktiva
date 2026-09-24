@@ -360,24 +360,6 @@ The plugin ships how-to skills for both products so Claude follows the correct M
 - **Sales invoices cannot be updated via the API** — there is no update endpoint, so the API route is delete and re-create. The Merit UI edits an invoice in place, which is usually the better fix for a single wrong field. A **paid** invoice is locked in both: remove the payment first. Merit does not issue invoice numbers; manage your own.
 - **Rate limit:** 100 requests/minute. The CLI auto-retries HTTP 429 honouring `Retry-After`.
 
----
-
-## Part of the Elnora family
-
-Open-source agent tooling from [Elnora AI](https://github.com/Elnora-AI) — free, universal, config-driven tools that wire Claude Code (or any AI coding agent) into the systems you run your company on. Each works 100% standalone; install several and they chain into end-to-end workflows.
-
-<!-- ELNORA-FAMILY:START -->
-- [elnora-linear](https://github.com/Elnora-AI/elnora-linear) — Linear issue management — search, bulk edit, agents, and a config-driven curator
-- [elnora-slack](https://github.com/Elnora-AI/elnora-slack) — the entire Slack Web API as a CLI plus agent skills with a draft-and-approve send gate
-- [elnora-whatsapp](https://github.com/Elnora-AI/elnora-whatsapp) — read, search, and send WhatsApp from your own paired account, 100% local
-- [elnora-google-workspace](https://github.com/Elnora-AI/elnora-google-workspace) — Gmail, Calendar, Drive, Docs, Sheets, Forms, Tasks, plus any Google API via Discovery
-- [elnora-vanta](https://github.com/Elnora-AI/elnora-vanta) — read-only Vanta compliance — frameworks, tests, controls, and vulnerabilities as agent-friendly JSON
-- [elnora-luma](https://github.com/Elnora-AI/elnora-luma) — Luma (lu.ma) events — all 61 public API endpoints as a spec-driven CLI with safety guardrails
-- [elnora-travel](https://github.com/Elnora-AI/elnora-travel) — a real travel agent — live flights, hotels, Airbnb, Booking.com, and routes in one itinerary
-- [elnora-websearch-tools](https://github.com/Elnora-AI/elnora-websearch-tools) — web search — Exa, Tavily, Perplexity, Firecrawl, and Valyu CLIs and skills in one plugin
-- [knowledge-vault](https://github.com/Elnora-AI/knowledge-vault) — an Obsidian-compatible knowledge base for agent teams — search and save your work to any vault
-<!-- ELNORA-FAMILY:END -->
-
 ## Development
 
 ```bash
@@ -393,3 +375,23 @@ See [CONTRIBUTING](.github/CONTRIBUTING.md) and [SAFETY](SAFETY.md).
 [Apache-2.0](LICENSE) © Elnora AI. Not affiliated with or endorsed by Merit Tarkvara AS.
 </content>
 </invoke>
+
+## Part of the Elnora family
+
+Open-source agent tooling from [Elnora AI](https://github.com/Elnora-AI) — free, universal, config-driven tools that wire Claude Code (or any AI coding agent) into the systems you run your company on. Each works 100% standalone; install several and they chain into end-to-end workflows. Take them all and you have the same system Elnora AI runs on internally.
+
+<!-- ELNORA-FAMILY:START -->
+- [elnora-starter-kit](https://github.com/Elnora-AI/elnora-starter-kit) — one-line Claude Code + Elnora install for biologists and non-technical founders; doubles as a starter template for any new Claude Code project
+- [elnora-ai-agent-hackathon-starter-kit](https://github.com/Elnora-AI/elnora-ai-agent-hackathon-starter-kit) — one command to your first AI agents (Claude Code or Codex), built for the Elnora AI agent hackathon
+- [elnora-linear](https://github.com/Elnora-AI/elnora-linear) — Linear issue management — search, bulk edit, agents, and a config-driven curator
+- [elnora-slack](https://github.com/Elnora-AI/elnora-slack) — the entire Slack Web API as a CLI plus agent skills with a draft-and-approve send gate
+- [elnora-whatsapp](https://github.com/Elnora-AI/elnora-whatsapp) — read, search, and send WhatsApp from your own paired account, 100% local
+- [elnora-google-workspace](https://github.com/Elnora-AI/elnora-google-workspace) — Gmail, Calendar, Drive, Docs, Sheets, Forms, Tasks, plus any Google API via Discovery
+- [elnora-vanta](https://github.com/Elnora-AI/elnora-vanta) — read-only Vanta compliance — frameworks, tests, controls, and vulnerabilities as agent-friendly JSON
+- [elnora-luma](https://github.com/Elnora-AI/elnora-luma) — Luma (lu.ma) events — all 61 public API endpoints as a spec-driven CLI with safety guardrails
+- [elnora-travel](https://github.com/Elnora-AI/elnora-travel) — a real travel agent — live flights, hotels, Airbnb, Booking.com, and routes in one itinerary
+- [elnora-websearch-tools](https://github.com/Elnora-AI/elnora-websearch-tools) — web search — Exa, Tavily, Perplexity, Firecrawl, and Valyu CLIs and skills in one plugin
+- [knowledge-vault](https://github.com/Elnora-AI/knowledge-vault) — an Obsidian-compatible knowledge base for agent teams — search and save your work to any vault
+
+The Elnora platform itself — the AI agent for lab work — is open too: [elnora-cli](https://github.com/Elnora-AI/elnora-cli) (the Elnora CLI), [elnora-mcp-server](https://github.com/Elnora-AI/elnora-mcp-server) (the Elnora MCP server), [elnora-plugins](https://github.com/Elnora-AI/elnora-plugins) (the Elnora plugin marketplace), [homebrew-cli](https://github.com/Elnora-AI/homebrew-cli) (the Homebrew tap for the CLI).
+<!-- ELNORA-FAMILY:END -->
