@@ -14,15 +14,14 @@
 //     silently double-post. POSTs fail fast so the operator verifies before re-running,
 //   - maps non-2xx and 200-with-stacktrace responses to ApiError.
 
-import { createRequire } from "node:module";
 import { type ApiVersion, endpointUrl, resolveBaseUrl, resolvePalkBaseUrl } from "../config/index.js";
 import { ApiError, RateLimitError, ValidationError } from "../utils/errors.js";
 import { sleep } from "../utils/sleep.js";
+import { VERSION } from "../version.js";
 import { type GetCredentialsOptions, getCredentials, getPalkCredentials, type MeritCredentials } from "./auth.js";
 import { formatTimestamp, sign } from "./signer.js";
 
-const pkg = createRequire(import.meta.url)("../../package.json") as { version: string };
-const USER_AGENT = `@elnora-ai/merit-aktiva/${pkg.version}`;
+const USER_AGENT = `@elnora-ai/merit-aktiva/${VERSION}`;
 
 const MAX_RETRIES = 3;
 const DEFAULT_RETRY_AFTER_MS = 2_000;
