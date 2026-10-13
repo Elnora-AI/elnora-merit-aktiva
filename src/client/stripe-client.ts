@@ -8,13 +8,12 @@
 // environment or ~/.config/elnora-merit/.env, same as the Merit credentials). A
 // read-only restricted key is sufficient.
 
-import { createRequire } from "node:module";
 import { CliError, EXIT_CODES } from "../utils/errors.js";
 import { stripWrappingQuotes } from "../utils/parse.js";
 import { sleep } from "../utils/sleep.js";
+import { VERSION } from "../version.js";
 
-const pkg = createRequire(import.meta.url)("../../package.json") as { version: string };
-const USER_AGENT = `@elnora-ai/merit-aktiva/${pkg.version}`;
+const USER_AGENT = `@elnora-ai/merit-aktiva/${VERSION}`;
 
 const STRIPE_API_BASE = "https://api.stripe.com/v1";
 const MAX_RETRIES = 3;
