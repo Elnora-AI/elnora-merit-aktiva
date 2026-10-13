@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.12](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.11...v0.1.12) (2026-10-13)
+
+
+### Bug Fixes
+
+* bundle the CLI so the plugin lists no packages Claude Code cannot install ([#74](https://github.com/Elnora-AI/elnora-merit-aktiva/issues/74)) ([a20262b](https://github.com/Elnora-AI/elnora-merit-aktiva/commit/a20262b5e6a3d37d37676247e8c10fd8e33557ca))
+
 ## [0.1.11](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.10...v0.1.11) (2026-09-17)
 
 
