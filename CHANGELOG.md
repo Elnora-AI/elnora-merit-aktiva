@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.13](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.12...v0.1.13) (2026-11-13)
+
+
+### Bug Fixes
+
+* **security:** refuse MERIT_REFERENCES_DIR from an untrusted cwd .env ([#86](https://github.com/Elnora-AI/elnora-merit-aktiva/issues/86)) ([3180121](https://github.com/Elnora-AI/elnora-merit-aktiva/commit/318012125c120cac3363c4f9d1fe491ecb1f814d))
+
 ## [0.1.12](https://github.com/Elnora-AI/elnora-merit-aktiva/compare/v0.1.11...v0.1.12) (2026-10-13)
 
 
